@@ -204,12 +204,6 @@
       }
     `)
 
-    svg.addElem('defs', `
-      <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#ff5"></stop>
-        <stop offset="40%" stop-color="#000"></stop>
-      </radialGradient>
-    `)
 
 
     const gears = generateGears(8, 15, .1, chance(
@@ -299,17 +293,6 @@
       })
 
 
-
-    svg.addElem('text', `
-
-      <textPath href="#wavepath">
-
-        <animate attributeName="startOffset" from="0%" to="100%" begin="0s" dur="8s" repeatCount="indefinite"></animate>
-
-        \$ \$ \$
-      </textPath>
-
-    `, { style: 'font-size: 50px', className: 'grow', fill: 'var(--yellow)'})
 
 
 
