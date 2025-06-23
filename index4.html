@@ -142,6 +142,7 @@ void main() {
 const fsSource = `
 precision mediump float;
 uniform vec4 u_color;
+uniform vec2 u_offset;
 
 void main() {
   gl_FragColor = u_color;
@@ -237,21 +238,47 @@ function render(timeMs) {
     gl.uniform1f(u_initialScale, initialScale);
     gl.uniform1f(u_aspect, ASPECT_RATIO);
 
-    times(10, q => {
+    times(10, _q => {
+
+      const q = 10 - _q
+//
+
+      const _g = g + q/100
+      const _b = b + q/8
+      const a = 1 - (q/10)
+      // console.log(a)
+
+      // gl.uniform2f(u_offset, 0, q / -1000);  // small offset for shadow
+      // gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      // gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
+
+      // gl.uniform2f(u_offset, 0, q / 1000);  // small offset for shadow
+      // gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      // gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
+
+
+      // gl.uniform2f(u_offset, q / 1000, 0);  // small offset for shadow
+      // gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      // gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
+
+      // gl.uniform2f(u_offset, q / -1000, 0);  // small offset for shadow
+      // gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      // gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
+
       gl.uniform2f(u_offset, q / 1000, q / -1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, g, b, 1.0);  // main: red
+      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / -1000, q / 1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, g, b, 1.0);  // main: red
+      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / 1000, q / 1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, g, b, 1.0);  // main: red
+      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / -1000, q / -1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, g, b, 1.0);  // main: red
+      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
     })
 
