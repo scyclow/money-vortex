@@ -1,0 +1,438 @@
+<html>
+  <head>
+    <meta charset="utf-8"/>
+
+
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ddd;
+        height: 100vh;
+      }
+
+      body * {
+        position: absolute;
+      }
+
+      #svg {
+/*        max-height: 100vmin;
+        max-width: 100vmin;*/
+      }
+    </style>
+
+    <body></body>
+    <script>
+      function genTokenData(projectNum) {
+
+        const pointHashesLookedAt = JSON.parse(localStorage.getItem('hidHashesLookedAt')) || 0
+
+        const queryParams = window.location.search
+          ? window.location.search.replace('?', '').split('&').reduce((params, i) => {
+              const [k, v] = i.split('=')
+              params[k] = v
+              return params
+            }, {})
+          : {}
+
+        let hash = '0x'
+        if (queryParams.hash) {
+          hash = queryParams.hash
+        } else {
+          for (let i = 0; i < 64; i++) {
+            hash += Math.floor(Math.random() * 16).toString(16)
+          }
+          window.location.hash = '#' + hash
+
+          const last10hashes = JSON.parse(localStorage.getItem('last10Hashes')) || []
+          last10hashes.unshift(hash)
+
+          localStorage.setItem('last10Hashes', JSON.stringify(last10hashes.slice(0, 10)))
+          localStorage.setItem('hidHashesLookedAt', JSON.stringify(pointHashesLookedAt+1))
+        }
+
+
+        let tokenId = queryParams.tokenId
+        if (!tokenId) {
+          tokenId = String(projectNum * 1000000 + Math.floor(Math.random() * 64))
+        }
+
+        return {
+          hash,
+          tokenId,
+        }
+      }
+
+      const tokenData = genTokenData(0)
+      console.log(tokenData.hash)
+    </script>
+
+    <script src="./utils.js"></script>
+    <script src="./colors.js"></script>
+    <script src="./rosette2.js"></script>
+    <!-- <script src="./symbol.js"></script> -->
+    <!-- <script src="./layout.js"></script> -->
+    <script src="./svg2.js"></script>
+    <!-- <script src="./index.js"></script> -->
+
+    <!-- <script src="./features.js"></script> -->
+
+
+
+    <style type="text/css">
+      .shrinkGrow {
+        animation: ShrinkGrow 18s ease-in-out infinite;
+        transform-origin: center;
+      }
+
+      @keyframes ShrinkGrow {
+        0%, 100% {
+          transform: scale(1.5) ;
+        }
+        50% {
+          transform: scale(0.7) ;
+        }
+      }
+  }
+
+    </style>
+
+
+
+    <script type="text/javascript">
+
+      window.onkeypress = function(e) {
+        if (e.keyCode == 32) {
+          var svg = document.getElementById('svg');
+          var serializer = new XMLSerializer();
+          var source = serializer.serializeToString(svg);
+          source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+          let a = document.createElement("a");
+          a.href = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+          a.download = `${tokenData.hash}.svg`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      }
+    </script>
+
+
+    <script>
+
+    svg = new SVG(19.2, 10.8)
+
+    const gridW = 1 //rndint(1, 5)
+    const gridH = 1//rndint(1, 5)
+    const gridMin = Math.min(gridW, gridH)
+    const minRad = 40
+    // const maxRad = 800/gridMin - ((gridMin-1) * 10)
+    const maxRad = 800/gridMin - ((gridMin-1) * 10)
+    // const maxRad = 400
+
+
+    const THEME = 1
+    //prb(0.1) ? 0 : 1
+
+    const strategyProbs = [[1,4]]
+    // const strategyProbs = [
+    //   [40, 1], // standard
+    //   [10, 2], // lines
+    //   [15, 4], // fragmented
+    //   [8, 6], // outterSpikey
+    //   [8, 7], // innerSpikey
+    //   [8, 8], // wavy
+    //   [2, 10], // circles
+    //   [5, 12], // ribbons
+    //   // [5, 13], // blocks
+    //   [4, 17], // horizontal dash
+    // ]
+
+
+
+
+    svg.svg.style.background = THEME === 1 ? '#fff' : '#000'
+
+    const rings = 5
+
+    const animationSpeed = 20
+
+    svg.addElem('style', `
+
+      :root {
+        --green: #ff0;
+        --yellow: #33007f
+      }
+
+      .grow {
+        animation: Grow ${animationSpeed}s linear infinite;
+        transform-origin: center;
+      }
+
+      @keyframes Grow {
+        0% {
+          transform: scale(0);
+          stroke-width: 20px;
+        }
+
+        95% {
+          opacity: 1;
+        }
+        100% {
+          transform: scale(15);
+          opacity: 0;
+          stroke-width: 0.25px;
+        }
+      }
+
+
+      .blink {
+        animation: Blink ${animationSpeed}s linear infinite;
+
+      }
+
+      @keyframes Blink {
+        0%, 100% {
+          opacity: 1
+        }
+        50% {
+          opacity: 1
+        }
+      }
+
+      .dancingFading {
+        animation: DancingFading 12s linear infinite;
+      }
+
+
+      @keyframes DancingFading {
+        0%, 100% {
+          opacity: 0;
+        }
+
+        22% {
+          transform: rotate(30deg);
+        }
+        33% {
+          opacity: 0;
+          transform: rotate(-30deg);
+        }
+        40% {
+          opacity: 1;
+        }
+        44% {
+          transform: rotate(30deg);
+        }
+        55% {
+          transform: rotate(-30deg);
+        }
+        60% {
+          opacity: 1;
+        }
+        66% {
+          opacity: 0;
+          transform: rotate(30deg);
+        }
+        77% {
+          transform: rotate(-30deg);
+        }
+      }
+    `, { invisible: true})
+
+    svg.addElem('defs', `
+      <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ff5"></stop>
+        <stop offset="40%" stop-color="#000"></stop>
+      </radialGradient>
+    `, { invisible: true})
+
+
+    const gears = generateGears(8, 15, .1, chance(
+      [55, returnOne],
+      [45, evenStart],
+    ))
+
+
+
+
+    const path = getRosettePath(
+      200,
+      gears,
+      1,
+      0,
+      0,
+      900,
+      false,
+      {x: svg.w/3, y: svg.h/3}
+    )
+
+
+    // svg.drawCircle(svg.w/2, svg.h/2, 30)
+
+
+
+
+
+      svg.drawRect(0, 0, svg.w, svg.h,  {
+        stroke: 'none',
+        // rotation: spiralFn(t),
+        strokeWidth: 5,
+        fill: 'url(#bgGradient)'
+      })
+
+
+    const dashes = sample([1, rndint(2, 4), rndint(4, 12), rndint(12, 36)])
+
+    times(dashes, t => {
+      const len = 150 * (35 / dashes)
+      const start = t * len
+      const end = (t+1) * len - 10
+
+      drawLineRosette(svg.w/2, svg.h/2, start, end, gears, {
+        stroke: 'var(--green)',
+        pointCount: t * 80  * (35 / dashes),
+        strokeWidth: 5,
+        style: `filter: drop-shadow( 0 0 10px #fff)`
+      })
+    })
+
+
+    // drawLineRosette(svg.w/2, svg.h/2, 500, 3500, gears, {
+    //   stroke: 'var(--green)',
+    //   pointCount: 1200,
+    //   strokeWidth: 5
+    // })
+
+
+
+
+
+    times(rings, t => {
+      const id = 'path-' + t
+
+      svg.drawPath(0, 0, path, {
+        stroke: 'var(--green)',
+        // rotation: spiralFn(t),
+        strokeWidth: 5,
+        // size: t/50,
+        gStyle: `animation-delay: -${animationSpeed * t/rings}s`,
+        gClass: 'grow',
+        style: `filter: drop-shadow( 0 0 5px #fff)`,
+        id
+
+      })
+
+    })
+
+
+
+    svg.addElem('text', `
+      🤑
+    `, {
+      x: '50%',
+      y: '50%',
+      style: 'font-size: 200px; text-anchor: middle; animation: DancingFading 12s linear infinite; transform-origin: center',
+      // className: 'dancingFading'
+    })
+
+
+
+    // svg.drawPath(0, 0, path, {
+    //   stroke: pen.black,
+    //   // rotation: spiralFn(t),
+    //   strokeWidth: 5,
+    //   gStyle: 'animation-delay: -3s',
+    //   // gClass: 'grow'
+    // })
+
+
+
+
+    // const usedPenColors = times(3, () => sample([pen.black, pen.blue, pen.teal, pen.red, pen.orange, pen.green, pen.lime, pen.yellow, pen.magenta, pen.purple, pen.pink, ]))
+
+    // console.log(usedPenColors)
+
+    // const Cw = svg.w/2
+    // const Ch = svg.h/2
+
+    // const offsetW = Cw/gridW
+    // const offsetH = 1*Ch/gridH
+
+    // const bgW = 5
+    // const bgH = 6
+
+
+
+
+
+    //   // times(bgH, i => {
+    //   //   const row = i+1
+    //   //   times(bgW, j => {
+    //   //     const col = j+1
+
+
+    //   //     const x = (2*col * Cw / bgW) - (Cw/bgW)
+    //   //     const y = (2*row * Ch / bgH) - (Ch/bgH)
+
+
+
+    //   //     const features = generateRosetteFeatures({
+    //   //       gears,
+    //   //       usedPenColors: ['#ddd'],
+    //   //       strategyProbs: [[1,18]],
+    //   //       hasShadowsPrb: 0,
+    //   //       multiplePrb: 0,
+    //   //       auraPrb: 0,
+    //   //     })
+
+    //   //     // drawNewRosetteWithFeatures(x, y, 20, 350, 40, features )
+    //   //     drawNewRosetteWithFeatures(x, y, 20, 100, 40, features )
+    //   //     drawNewRosetteWithFeatures(x, y, 20, 200, 40, features )
+    //   //     drawNewRosetteWithFeatures(x, y, 20, 300, 40, features )
+    //   //     drawNewRosetteWithFeatures(x, y, 20, 400, 40, features )
+
+
+
+    //   //   })
+    //   // })
+
+    //   times(gridH, i => {
+    //     const row = i+1
+    //     times(gridW, j => {
+    //       const col = j+1
+
+
+    //       const x = (2*col * Cw / gridW) - offsetW
+    //       const y = (2*row * Ch / gridH) - offsetH
+
+
+    //       const radiaChange = rnd(0.00025, 0.005)
+
+    //       const features = generateRosetteFeatures({
+    //         // usedPenColors,
+    //         strategyProbs,
+    //         // hasShadowsPrb: 0,
+    //         // multiplePrb: 0,
+    //         // auraPrb: 0,
+    //         // spiralFn: () => 0,
+    //         // changeRadia: false,
+    //         // irregularSpacing: false
+    //       })
+
+    //       drawNewRosetteWithFeatures(x, y, minRad, maxRad, 80, features, 8)
+
+
+
+    //     })
+    //   })
+
+
+      svg.mount()
+
+    </script>
+
+  </head>
+</html>
