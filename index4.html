@@ -228,8 +228,8 @@ function render(timeMs) {
     const initialScale = i * 0.25;
 
     const r = 1
-    const g = 0.9
-    const b = 0.2
+    const g = 0
+    const b = 0
 
 
 
@@ -243,10 +243,11 @@ function render(timeMs) {
       const q = 10 - _q
 //
 
-      const _g = g + q/100
-      const _b = b + q/8
+      const _r = r - q/10
+      const _g = g + q/10
+      const _b = b + q/10
       const a = 1 - (q/10)
-      // console.log(a)
+
 
       // gl.uniform2f(u_offset, 0, q / -1000);  // small offset for shadow
       // gl.uniform4f(u_color, r, _g, _b, a);  // main: red
@@ -266,19 +267,19 @@ function render(timeMs) {
       // gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / 1000, q / -1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      gl.uniform4f(u_color, _r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / -1000, q / 1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      gl.uniform4f(u_color, _r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / 1000, q / 1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      gl.uniform4f(u_color, _r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
 
       gl.uniform2f(u_offset, q / -1000, q / -1000);  // small offset for shadow
-      gl.uniform4f(u_color, r, _g, _b, a);  // main: red
+      gl.uniform4f(u_color, _r, _g, _b, a);  // main: red
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount);
     })
 
