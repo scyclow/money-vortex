@@ -65,3 +65,7 @@ function chance(...chances) {
 }
 
 const rndChar = () => sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''))
+
+function waitPromise(ms) {
+  return new Promise(res => setTimeout(res, ms))
+}
