@@ -114,7 +114,7 @@ function getRosettePath(rad, gears, cycles=1, spacing=0, startOffset=0, pointCou
 //   return d
 // }
 
-const shadowColor = sample(penColors)
+const shadowColor = '#000'
 
 function drawRibbedRosette(x, y, minRad, layers, {gears, rosetteRadiaChange, rosetteRotation, dist, ...args}) {
   dist = dist || 15

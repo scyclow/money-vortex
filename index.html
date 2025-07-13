@@ -1,117 +1,278 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Money Vortex</title>
-  <style>
+  <meta charset="utf-8">
+  <title></title>
+
+  <style type="text/css">
     * {
-      margin: 0;
       padding: 0;
+      margin: 0;
     }
 
     canvas {
       display: block;
-      width: 100vw;
-      height: 100vh;
     }
   </style>
 </head>
-
 <body>
-<canvas id="shaderCanvas"></canvas>
+
+<script>
+      function genTokenData(projectNum) {
+
+        const pointHashesLookedAt = JSON.parse(localStorage.getItem('hidHashesLookedAt')) || 0
+
+        const queryParams = window.location.search
+          ? window.location.search.replace('?', '').split('&').reduce((params, i) => {
+              const [k, v] = i.split('=')
+              params[k] = v
+              return params
+            }, {})
+          : {}
+
+        let hash = '0x'
+        if (queryParams.hash) {
+          hash = queryParams.hash
+        } else {
+          for (let i = 0; i < 64; i++) {
+            hash += Math.floor(Math.random() * 16).toString(16)
+          }
+          window.location.hash = '#' + hash
+
+          const last10hashes = JSON.parse(localStorage.getItem('last10Hashes')) || []
+          last10hashes.unshift(hash)
+
+          localStorage.setItem('last10Hashes', JSON.stringify(last10hashes.slice(0, 10)))
+          localStorage.setItem('hidHashesLookedAt', JSON.stringify(pointHashesLookedAt+1))
+        }
+
+
+        let tokenId = queryParams.tokenId
+        if (!tokenId) {
+          tokenId = String(projectNum * 1000000 + Math.floor(Math.random() * 64))
+        }
+
+        return {
+          hash,
+          tokenId,
+        }
+      }
+
+      const tokenData = genTokenData(0)
+      console.log(tokenData.hash)
+    </script>
+    <canvas id="glcanvas"></canvas>
+
+
+    <script src="./utils.js"></script>
+    <script src="./rosette2.js"></script>
 
 
 
 
 
-<script type="text/javascript">
+<script type="module">
+
+  import {coordsList, props} from './coordinates.js'
+  import {createProgram} from './shaderBoilerplate.js'
+  import {activateSound} from './sound.js'
 
 
-  executeShader('shaderCanvas', './vertex.glsl', './fragment.glsl')
+  const canvas = document.getElementById("glcanvas")
+  const gl = canvas.getContext("webgl")
+  const dpr = window.devicePixelRatio || 1
+
+
+  const speed = 1
+  const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency } = props
 
 
 
-  async function executeShader(canvasId, vertexURL, fragURL) {
-    const canvas = document.getElementById(canvasId)
-    const gl = canvas.getContext('webgl2')
+  const vsSource = `
+    attribute vec2 a_position;
+    uniform float u_time;
+    uniform float u_animScale;
+    uniform float u_aspect;
+    uniform vec2 u_offset;
+    uniform float u_rotation;
 
-    if (!gl) {
-      throw new Error('WebGL not supported')
+
+    void main() {
+      float scale = mix(0.05, 1.0, u_animScale);
+
+      float angle = u_rotation;
+      float cosA = cos(angle);
+      float sinA = sin(angle);
+      vec2 rotatedPosition = vec2(
+        a_position.x * cosA - a_position.y * sinA,
+        a_position.x * sinA + a_position.y * cosA
+      );
+
+      vec2 pos = (rotatedPosition * scale) + u_offset * (u_animScale / 16.0);
+      pos.x /= u_aspect;
+
+      gl_Position = vec4(pos, 0.0, 1.0);
     }
+  `;
 
-    const vertex = await loadShaderFile(vertexURL)
-    const fragment = await loadShaderFile(fragURL)
+  const fsSource = `
+    precision mediump float;
+    uniform vec4 u_color;
+    uniform vec2 u_offset;
 
-    const vertexShader = compileShader(gl, vertex, gl.VERTEX_SHADER)
-    const fragmentShader = compileShader(gl, fragment, gl.FRAGMENT_SHADER)
+    void main() {
+      gl_FragColor = u_color;
+    }
+  `;
 
-    const program = createProgram(gl, vertexShader, fragmentShader)
 
+
+const programs = coordsList.map(coords => {
+  const program = createProgram(gl, vsSource, fsSource)
+  gl.useProgram(program)
+
+
+  const a_position = gl.getAttribLocation(program, "a_position")
+  const u_time = gl.getUniformLocation(program, "u_time")
+  const u_animScale = gl.getUniformLocation(program, "u_animScale")
+  const u_aspect = gl.getUniformLocation(program, "u_aspect")
+  const u_offset = gl.getUniformLocation(program, "u_offset")
+  const u_color = gl.getUniformLocation(program, "u_color")
+  const u_rotation = gl.getUniformLocation(program, "u_rotation")
+
+  // Buffer setup
+  const buffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW)
+
+  gl.enableVertexAttribArray(a_position)
+  gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0)
+
+
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+  gl.clearColor(0, 0, 0, 1)
+
+  gl.enable(gl.BLEND)
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+  return {
+    a_position,
+    u_time,
+    u_animScale,
+    u_rotation,
+    u_aspect,
+    u_offset,
+    u_color,
+    program,
+    buffer,
+    vertexCount: coords.length / 2
+  }
+})
+
+
+
+
+
+
+let ASPECT_RATIO = canvas.width / canvas.height
+
+
+function resize() {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  ASPECT_RATIO = canvas.width / canvas.height
+  gl.viewport(0, 0, canvas.width, canvas.height)
+}
+
+resize()
+window.onresize = resize
+
+
+
+
+const {r, g, b} = chance(
+  [1, {r: 1, g: 0.25, b: 0}],
+  [1, {r: 0, g: 1, b: 1}],
+  [1, {r: 1, g: 0.25, b: 1}],
+)
+
+
+
+let frame = 0
+function render(timeMs) {
+  frame++
+  gl.clear(gl.COLOR_BUFFER_BIT)
+
+  const timeSec = timeMs * 0.001 * speed
+
+
+  programs.forEach((coords, i) => {
+    const { a_position, u_time, u_animScale, u_aspect, u_offset, u_color, u_rotation, program, vertexCount, buffer } = coords
     gl.useProgram(program)
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    gl.enableVertexAttribArray(a_position)
+    gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0)
+    gl.uniform1f(u_time, timeSec)
+    gl.uniform1f(u_aspect, ASPECT_RATIO)
+
+
+
+    const animScale = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
 
 
 
 
 
-    // i don't know what any of this shit does
-    const quadVerts = new Float32Array([
-      -1, -1,
-       3, -1,
-      -1,  3
-    ]);
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    function drawVertex(scale, r=1, g=1, b=1, a=1) {
+      gl.uniform1f(u_animScale, animScale * scale)
+      gl.uniform4f(u_color, r, g, b, a)
+      gl.drawArrays(gl.LINE_STRIP, 0, vertexCount)
 
-    function render() {
-      gl.clearColor(0, 0, 0, 1);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      requestAnimationFrame(render);
     }
-    render();
 
+    const shadows = 12
+    times(shadows, t => {
+      drawVertex(1 - (t * 0.0025), r, g, b, 0.4 - (t * (0.4/shadows)))
+    })
+
+    times(shadows, t => {
+      drawVertex(1 + (t * 0.0025), r, g, b, 0.4 - (t * (0.4/shadows)))
+    })
+
+
+
+    // drawVertex(1, 1, 0, 0, 1)
+    // drawVertex(1.0025, 1, 0, 0, 1)
+    // drawVertex(1.005, 1, 0, 0, 1)
+    // drawVertex(1.0075, 1, 0, 0, 1)
+  })
+
+
+  requestAnimationFrame(render)
+}
+
+
+requestAnimationFrame(render)
+
+
+
+let soundActivated = false
+
+document.body.style.cursor = 'pointer'
+
+document.onclick = () => {
+  if (!soundActivated) {
+    activateSound()
+    soundActivated = true
   }
+}
 
 
-
-
-
-  function compileShader(gl, src, shaderType) {
-    const shader = gl.createShader(shaderType)
-    gl.shaderSource(shader, src)
-    gl.compileShader(shader)
-
-    const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS)
-    if (!success) throw new Error(`Shader compilation error: ` + gl.getShaderInfoLog(shader))
-
-    return shader
-  }
-
-
-  function createProgram(gl, vertexShader, fragmentShader) {
-    const program = gl.createProgram()
-
-    gl.attachShader(program, vertexShader)
-    gl.attachShader(program, fragmentShader)
-
-    gl.linkProgram(program)
-
-    const success = gl.getProgramParameter(program, gl.LINK_STATUS)
-    if (!success) throw new Error(`Shader link error: ` + gl.getShaderInfoLog(program))
-
-    return program
-  }
-
-  async function loadShaderFile(url) {
-    const res = await fetch(url)
-    return res.text()
-  }
 
 </script>
+
+
+
 </body>
 </html>
