@@ -1,55 +1,116 @@
+import attrs from './attrs.js'
 
-function genPointyType() {
-  return {
-    gearWaveFrequency: 4,
-    points: 1800-4,
-    layers: 40,
-    gearWaveAmplitude: 0.04,
-    radiaChange: rnd(0.005, 0.1) * 2,
-    radiaAdj: (p, i, _x, _y, baseRadius, prevRadius) => {
-      const progress = p / points
-      return 1 + Math.abs(Math.sin((p/gearWaveFrequency)) * gearWaveAmplitude) * -1
+
+const typeFunctions = {
+  normal() {
+    const points = 900
+    const gearWaveFrequency = 4
+    const gearWaveAmplitude = 0
+
+    return {
+      points,
+      gearWaveFrequency,
+      gearWaveAmplitude,
+      layers: 40,
+      radiaChange: attrs.radiaChange,
+      cycles: 1,
+      radiaAdj: () => 1
+    }
+  },
+
+  pointy() {
+    const points = 1800
+    const gearWaveFrequency = 64
+    const gearWaveAmplitude = 0.05
+
+    return {
+      points,
+      gearWaveFrequency,
+      gearWaveAmplitude,
+      layers: 40,
+      radiaChange: attrs.radiaChange,
+      cycles: 1,
+      // radiaAdj: (p, i, _x, _y, baseRadius, prevRadius) => {
+      radiaAdj: p => {
+        const progress = 2 * Math.PI * p / points
+        const frequency = progress * gearWaveFrequency
+        return 1 + Math.abs(Math.cos(frequency) * gearWaveAmplitude) * -1
+
+      }
+    }
+  },
+
+  // spikey() {
+  //   const points = 1800-4
+  //   const gearWaveFrequency = 4
+  //   const gearWaveAmplitude = 0.04
+
+  //   return {
+  //     points,
+  //     gearWaveFrequency,
+  //     gearWaveAmplitude,
+  //     layers: 40,
+  //     radiaChange: attrs.radiaChange,
+  //     radiaAdj: (p) => {
+  //       const progress = Math.PI * p / points
+  //       return 1 + Math.abs(Math.sin((p/gearWaveFrequency)) * gearWaveAmplitude) * -1
+  //     }
+  //   }
+  // },
+
+  wavey() {
+    const points = 900
+    const gearWaveFrequency = Math.floor(rnd(30, 60))
+    const gearWaveAmplitude = rnd(0.04, 0.08)
+
+    return {
+      points,
+      gearWaveFrequency,
+      gearWaveAmplitude,
+      layers: 40,
+      radiaChange: attrs.radiaChange / 20,
+      cycles: 1,
+      radiaAdj: p => {
+        const progress = 2 * Math.PI * p / points
+        const frequency = progress * gearWaveFrequency
+
+        return 1 + Math.cos(frequency) * gearWaveAmplitude
+      }
+    }
+  },
+
+  numismatic() {
+    const points = 900
+    // const gearWaveFrequency = 20
+    // const gearWaveAmplitude = 0.06
+    const gearWaveFrequency = 30
+    const gearWaveAmplitude = 0.07
+    const cycles = 3
+
+    return {
+      points,
+      gearWaveFrequency,
+      gearWaveAmplitude,
+      layers: 40,
+      radiaChange: attrs.radiaChange / 20,
+      cycles,
+      startOffset: gearWaveFrequency/cycles,
+      radiaAdj: p => {
+        // const progress = 2 * Math.PI * p / points
+
+        const progress = 2 * Math.PI * p / points
+        const frequency = progress * gearWaveFrequency
+
+        return 1 + Math.cos(frequency) * gearWaveAmplitude
+      }
     }
   }
 }
 
 
-function genWavyType() {
-  return {
-    gearWaveFrequency: 4,
-    points: 900+40,
-    layers: 40,
-    gearWaveAmplitude: 0.04,
-    radiaChange: rnd(0.0005, 0.01),
-    radiaAdj: (p, i, _x, _y, baseRadius, prevRadius) => {
-      const progress = p / points
-      return 1 + Math.sin((p/points)*(points/gearWaveFrequency)) * gearWaveAmplitude
-    }
-  }
-}
-
-function genNormalType() {
-  return {
-    gearWaveFrequency: 4,
-    points: 900,
-    layers: 40,
-    gearWaveAmplitude: 0,
-    radiaChange: rnd(0.005, 0.1) * 2,
-    radiaAdj: (p, i, _x, _y, baseRadius, prevRadius) => {
-      const progress = p / points
-      return 1 + Math.sin((p/points)*(points/gearWaveFrequency)) * gearWaveAmplitude
-    }
-  }
-}
 
 
-
-
-const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency } = chance(
-  [1, genPointyType()],
-  [1, genWavyType()],
-  [1, genNormalType()],
-)
+const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency, cycles, startOffset } = typeFunctions[attrs.rosetteType]()
 
 
 
@@ -75,10 +136,11 @@ const generatePath = (t) => {
   const p = getRosettePoints(
     200,
     g,
-    1,
+    cycles,
     0,
     0,
     points,
+    startOffset
   )
 
   p.push(p[0].slice())

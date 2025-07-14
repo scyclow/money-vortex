@@ -52,15 +52,15 @@ function createSpirographFn(baseRadius, gears) {
   )
 }
 
-function getRosettePoints(rad, gears, cycles=1, spacing=0, startOffset=0, pointCount=900) {
+function getRosettePoints(rad, gears, cycles=1, spacing=0, startOffset=0, pointCount=900, pointCountAddition=2) {
   const spirographFn = createSpirographFn(rad, gears)
 
   return times(
-    (cycles*pointCount+2),
+    (cycles*pointCount+pointCountAddition*cycles),
     p => {
       const _p = p + (pointCount*startOffset)
       return spirographFn(
-        _p/(pointCount+2),
+        _p/(pointCount+pointCountAddition),
         _p,
         spacing*_p/pointCount
       )

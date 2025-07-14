@@ -2,7 +2,7 @@
 import {MAX_VOLUME, SoundSrc} from './audio.js'
 import {voices, say} from './voices.js'
 
-const sayAffirmations = true
+const sayAffirmations = false
 
 
 const somberNotes = {
@@ -37,10 +37,15 @@ const hopefulNotes = {
 
 
 
-const notes = {
-  main: hopefulNotes.a4,
-  secondary: Object.values(hopefulNotes)
-}
+const notes = prb(0.5)
+  ? {
+    main: hopefulNotes.a4,
+    secondary: Object.values(hopefulNotes)
+  }
+  : {
+    main: somberNotes.b4,
+    secondary: Object.values(somberNotes)
+  }
 
 
 

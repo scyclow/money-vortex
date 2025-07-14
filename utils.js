@@ -78,3 +78,61 @@ const rndChar = () => sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''))
 function waitPromise(ms) {
     return new Promise(res => setTimeout(res, ms))
 }
+
+
+function hsvToRgb(h, s, v) {
+  const c = v * s
+  const hPrime = (h%360) / 60
+  const x = c * (1 - Math.abs(hPrime % 2 - 1))
+  let r = 0, g = 0, b = 0
+
+  if (0 <= hPrime && hPrime < 1) {
+    r = c; g = x; b = 0;
+  } else if (1 <= hPrime && hPrime < 2) {
+    r = x; g = c; b = 0;
+  } else if (2 <= hPrime && hPrime < 3) {
+    r = 0; g = c; b = x;
+  } else if (3 <= hPrime && hPrime < 4) {
+    r = 0; g = x; b = c;
+  } else if (4 <= hPrime && hPrime < 5) {
+    r = x; g = 0; b = c;
+  } else if (5 <= hPrime && hPrime < 6) {
+    r = c; g = 0; b = x;
+  }
+
+  const m = v - c
+  return {
+    r: r + m,
+    g: g + m,
+    b: b + m
+  }
+}
+
+function hexToRgbNormalized(hex) {
+  // Remove the hash if present
+  hex = hex.replace(/^#/, '');
+
+  // Expand shorthand (e.g., #f03) to full form (#ff0033)
+  if (hex.length === 3) {
+    hex = hex.split('').map(c => c + c).join('');
+  }
+
+  if (hex.length !== 6) {
+    throw new Error('Invalid hex color');
+  }
+
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+
+  return { r, g, b };
+}
+
+function rgbNormalizedToHex({ r, g, b }) {
+  const toHex = (value) => {
+    const hex = Math.round(value * 255).toString(16);
+    return hex.padStart(2, '0'); // Ensure two digits
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}

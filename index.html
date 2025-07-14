@@ -10,9 +10,6 @@
       margin: 0;
     }
 
-    canvas {
-      display: block;
-    }
   </style>
 </head>
 <body>
@@ -61,7 +58,6 @@
       const tokenData = genTokenData(0)
       console.log(tokenData.hash)
     </script>
-    <canvas id="glcanvas"></canvas>
 
 
     <script src="./utils.js"></script>
@@ -72,18 +68,22 @@
 
 
 <script type="module">
+  import attrs from './attrs.js'
 
   import {coordsList, props} from './coordinates.js'
   import {createProgram} from './shaderBoilerplate.js'
   import {activateSound} from './sound.js'
 
 
-  const canvas = document.getElementById("glcanvas")
+  const canvas = document.createElement('canvas');
   const gl = canvas.getContext("webgl")
   const dpr = window.devicePixelRatio || 1
 
+  canvas.style.display = 'block';
+  canvas.style.zIndex = '1';
 
-  const speed = 1
+
+
   const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency } = props
 
 
@@ -151,7 +151,11 @@ const programs = coordsList.map(coords => {
 
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-  gl.clearColor(0, 0, 0, 1)
+
+  // BG color
+
+  const bg = attrs.bgColor
+  gl.clearColor(bg.r, bg.g, bg.b, 1)
 
   gl.enable(gl.BLEND)
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -191,11 +195,13 @@ window.onresize = resize
 
 
 
-const {r, g, b} = chance(
+let {r, g, b} = chance(
   [1, {r: 1, g: 0.25, b: 0}],
   [1, {r: 0, g: 1, b: 1}],
   [1, {r: 1, g: 0.25, b: 1}],
 )
+
+const rndVibrate = rnd() / 10
 
 
 
@@ -204,7 +210,7 @@ function render(timeMs) {
   frame++
   gl.clear(gl.COLOR_BUFFER_BIT)
 
-  const timeSec = timeMs * 0.001 * speed
+  const timeSec = timeMs * 0.001 * attrs.speed
 
 
   programs.forEach((coords, i) => {
@@ -218,32 +224,53 @@ function render(timeMs) {
 
 
 
-    const animScale = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
+    // const animScale = (1 + (frame % 2 ? rndVibrate : 0)) * (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
+    // const animScale = (1 + (Math.random() / 100)) * (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
+    // const animScale = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
+    const animScale = (0.2 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 7.0
+    const animScale2 = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
 
 
-
+// console.log(attrs.rotation, animScale2, (attrs.rotation * animScale2/81))
 
 
     function drawVertex(scale, r=1, g=1, b=1, a=1) {
+      gl.uniform1f(u_rotation, attrs.rotationDirection * (attrs.rotation * animScale2/81)**.8)
       gl.uniform1f(u_animScale, animScale * scale)
       gl.uniform4f(u_color, r, g, b, a)
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount)
-
     }
 
-    const shadows = 12
+
+    const animProgress = 3*animScale/128;
+
+    ({r, g, b} = hsvToRgb(attrs.startHue + (animProgress * 130), 0.4  + 0.35 * animProgress, 1))
+
+    // if (frame % 120 === 0 && i % 4 === 0) console.log(r, g, b)
+
+    if (attrs.aura) drawVertex(25 , 1, 1, 1, 0.5)
+    // drawVertex(24.975 , 1, 1, 1, 0.5)
+
+    const shadows = attrs.lines === 'glowing' ? 12 : 8
+    const lineSpace = attrs.lines === 'glowing' ? 0.0025 : 0.00125
+
     times(shadows, t => {
-      drawVertex(1 - (t * 0.0025), r, g, b, 0.4 - (t * (0.4/shadows)))
+      const a = attrs.lines === 'glowing' ? 0.4 - (t * (0.4/shadows)) : 1
+      drawVertex(1 - (t * lineSpace), r, g, b, a)
     })
 
     times(shadows, t => {
-      drawVertex(1 + (t * 0.0025), r, g, b, 0.4 - (t * (0.4/shadows)))
+      const a = attrs.lines === 'glowing' ? 0.4 - (t * (0.4/shadows)) : 1
+      drawVertex(1 + (t * lineSpace), r, g, b, a)
     })
 
 
+// TODO
+  // rings should fade out instead of hard disappear
 
-    // drawVertex(1, 1, 0, 0, 1)
-    // drawVertex(1.0025, 1, 0, 0, 1)
+
+    drawVertex(1, r, g, b, 0.8)
+    drawVertex(1.0025, r, g, b, 0.8)
     // drawVertex(1.005, 1, 0, 0, 1)
     // drawVertex(1.0075, 1, 0, 0, 1)
   })
@@ -260,6 +287,9 @@ requestAnimationFrame(render)
 let soundActivated = false
 
 document.body.style.cursor = 'pointer'
+document.body.style.backgroundColor = rgbNormalizedToHex(attrs.bgColor)
+canvas.style.backgroundColor = `hsl(${rnd(360)}deg, 100%, ${rnd(100)}%)`
+
 
 document.onclick = () => {
   if (!soundActivated) {
@@ -267,6 +297,58 @@ document.onclick = () => {
     soundActivated = true
   }
 }
+
+
+
+// const style = document.createElement('style');
+// document.body.appendChild(style);
+
+// style.textContent = `
+//   .dollar {
+//     position: absolute;
+//     animation: blink 6s infinite;
+//     pointer-events: none;
+//     user-select: none;
+//     z-index: 0;
+//     font-family: sans-serif;
+//     color: #fff;
+//   }
+
+//   @keyframes blink {
+//     0%, 100% { opacity: 0.5; }
+//     50% { opacity: 0; }
+//   }
+
+//   body {
+//     margin: 0;
+//     overflow: hidden;
+//     background-color: black;
+//   }
+// `;
+
+// const numDollars = 200;
+
+// for (let i = 0; i < numDollars; i++) {
+//   const dollar = document.createElement('div');
+//   dollar.className = 'dollar';
+//   dollar.innerText = '$';
+
+//   const size = rnd() * 2 + 8; // font size between 12px and 36px
+//   const x = rnd() * 100;
+//   const y = rnd() * 100;
+
+//   dollar.style.animationDelay = rnd(-6) + 's';
+//   dollar.style.left = `${x}vw`;
+//   dollar.style.top = `${y}vh`;
+//   dollar.style.fontSize = `${size}px`;
+//   dollar.style.opacity =rnd().toFixed(2); // random initial opacity
+
+//   document.body.appendChild(dollar);
+// }
+
+
+  document.body.appendChild(canvas);
+
 
 
 
