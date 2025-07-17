@@ -1,8 +1,9 @@
 
 import {MAX_VOLUME, SoundSrc} from './audio.js'
 import {voices, say} from './voices.js'
+import affirmations from './affirmations.js'
 
-const sayAffirmations = false
+const sayAffirmations = true
 
 
 const somberNotes = {
@@ -158,13 +159,6 @@ export const activateSound = async () => {
 
 
   if (sayAffirmations) {
-    setInterval(() => say(defaultVoice, sample([
-      'Wealth is attracted to you',
-      'you will succeed',
-      'success is a virtue',
-      'infinite abundance',
-      'your life has value',
-      'success is right around the corner'
-    ]), { speed: 0.9 }), 10000)
+    setInterval(() => say(defaultVoice, sample(affirmations), { speed: 0.9 }), 10000)
   }
 }
