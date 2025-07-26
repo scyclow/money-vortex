@@ -11,7 +11,7 @@ const typeFunctions = {
       points,
       gearWaveFrequency,
       gearWaveAmplitude,
-      layers: 40,
+      layers: Math.round(40 * attrs.layerMult),
       radiaChange: attrs.radiaChange,
       cycles: 1,
       radiaAdj: () => 1
@@ -113,14 +113,19 @@ const typeFunctions = {
 const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency, cycles, startOffset } = typeFunctions[attrs.rosetteType]()
 
 
+function createGears() {
+  const gears = generateGears(8, 15, .1, chance(
+    [55, returnOne],
+    [45, evenStart],
+  ))
 
-const gears = generateGears(8, 15, .1, chance(
-  [55, returnOne],
-  [45, evenStart],
-))
+  gears[0].radiaAdj = radiaAdj
 
-gears[0].radiaAdj = radiaAdj
 
+
+  return gears
+
+}
 
 const gearModifier = (gears, t, totalLayers) => gears.map(g => ({
   ...g,
@@ -131,7 +136,8 @@ const gearModifier = (gears, t, totalLayers) => gears.map(g => ({
 
 const paths = []
 
-const generatePath = (t) => {
+
+const generatePath = (t, pathList, gears) => {
   const g = gearModifier(gears, t, layers)
   const p = getRosettePoints(
     200,
@@ -144,14 +150,17 @@ const generatePath = (t) => {
   )
 
   p.push(p[0].slice())
-  paths.push(p.flat())
+  pathList.push(p.flat())
 }
 
 
+const gears1 = createGears()
 
 
-times(layers, t => generatePath(t))
-times(layers, t => generatePath(layers - t))
+times(layers, t => generatePath(t, paths, gears1))
+times(layers, t => generatePath(layers - t, paths, gears1))
+
+
 
 
 const pathToCoords = path => {
@@ -182,6 +191,7 @@ const pathToCoords = path => {
 }
 
 export const coordsList = paths.map(pathToCoords)
+
 
 
 export const props = { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency }

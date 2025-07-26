@@ -2,6 +2,8 @@
 import {MAX_VOLUME, SoundSrc} from './audio.js'
 import {voices, say} from './voices.js'
 import affirmations from './affirmations.js'
+import attrs from './attrs.js'
+
 
 const sayAffirmations = true
 
@@ -51,16 +53,7 @@ const notes = prb(0.5)
 
 
 
-const brainwaves = {
-  delta: rnd(0.5, 4),
-  theta: rnd(4, 8),
-  // alpha: rnd(8, 14),
-  // beta: rnd(14, 30),
-  // gamma: rnd(30, 100),
-}
 
-const bw = sample(Object.keys(brainwaves))
-const brainwave = brainwaves[bw]
 
 const tone = notes.main
 
@@ -70,7 +63,7 @@ const toneAdj = rnd(0.5, 1.5) / 2
 function getTone(t) {
   const toneM = t * toneAdj
 
-  const bwAdj = posOrNeg() * brainwave/2
+  const bwAdj = posOrNeg() * attrs.brainwave/2
   const toneL = toneM - bwAdj
   const toneR = toneL + bwAdj
 

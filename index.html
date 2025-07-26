@@ -127,52 +127,57 @@
 
 
 
-const programs = coordsList.map(coords => {
-  const program = createProgram(gl, vsSource, fsSource)
-  gl.useProgram(program)
+
+function createPrograms(coordsList) {
+  return coordsList.map(coords => {
+    const program = createProgram(gl, vsSource, fsSource)
+    gl.useProgram(program)
 
 
-  const a_position = gl.getAttribLocation(program, "a_position")
-  const u_time = gl.getUniformLocation(program, "u_time")
-  const u_animScale = gl.getUniformLocation(program, "u_animScale")
-  const u_aspect = gl.getUniformLocation(program, "u_aspect")
-  const u_offset = gl.getUniformLocation(program, "u_offset")
-  const u_color = gl.getUniformLocation(program, "u_color")
-  const u_rotation = gl.getUniformLocation(program, "u_rotation")
+    const a_position = gl.getAttribLocation(program, "a_position")
+    const u_time = gl.getUniformLocation(program, "u_time")
+    const u_animScale = gl.getUniformLocation(program, "u_animScale")
+    const u_aspect = gl.getUniformLocation(program, "u_aspect")
+    const u_offset = gl.getUniformLocation(program, "u_offset")
+    const u_color = gl.getUniformLocation(program, "u_color")
+    const u_rotation = gl.getUniformLocation(program, "u_rotation")
 
-  // Buffer setup
-  const buffer = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    // Buffer setup
+    const buffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
 
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW)
 
-  gl.enableVertexAttribArray(a_position)
-  gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(a_position)
+    gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0)
 
 
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
 
-  // BG color
+    // BG color
 
-  const bg = attrs.bgColor
-  gl.clearColor(bg.r, bg.g, bg.b, 1)
+    const bg = attrs.bgColor
+    gl.clearColor(bg.r, bg.g, bg.b, 1)
 
-  gl.enable(gl.BLEND)
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-  return {
-    a_position,
-    u_time,
-    u_animScale,
-    u_rotation,
-    u_aspect,
-    u_offset,
-    u_color,
-    program,
-    buffer,
-    vertexCount: coords.length / 2
-  }
-})
+    return {
+      a_position,
+      u_time,
+      u_animScale,
+      u_rotation,
+      u_aspect,
+      u_offset,
+      u_color,
+      program,
+      buffer,
+      vertexCount: coords.length / 2
+    }
+  })
+}
+
+const programs = createPrograms(coordsList)
 
 
 
@@ -195,14 +200,40 @@ window.onresize = resize
 
 
 
-let {r, g, b} = chance(
-  [1, {r: 1, g: 0.25, b: 0}],
-  [1, {r: 0, g: 1, b: 1}],
-  [1, {r: 1, g: 0.25, b: 1}],
-)
+
+
+
+
+
+
+// let {r, g, b} = chance(
+//   [1, {r: 1, g: 0.25, b: 0}],
+//   [1, {r: 0, g: 1, b: 1}],
+//   [1, {r: 1, g: 0.25, b: 1}],
+// )
 
 const rndVibrate = rnd() / 10
 
+
+
+
+function colorAlternateHue (ix, thickness, offsets) {
+  const offsetIx = Math.floor(ix/thickness) % offsets.length
+  return offsets[offsetIx]
+}
+
+
+
+function colorStrategy(progress, ix, t) {
+  if (attrs.colorStrategy === 'pure') return hsvToRgb(attrs.startHue, 0.65, 1)
+  if (attrs.colorStrategy === 'rainbow') return hsvToRgb(attrs.startHue + (progress * 4000), 0.4  + 0.35 * progress, 1)
+  if (attrs.colorStrategy === 'alternate') {
+
+    const hueProgression = attrs.hasAura ? 1 : 10
+    const h = attrs.startHue + colorAlternateHue(ix, attrs.alternateThickness, [0, ...attrs.alternateHues])
+    return hsvToRgb(h % 360 + (progress * hueProgression), 0.4  + 0.35 * progress, 1)
+  }
+}
 
 
 let frame = 0
@@ -213,7 +244,7 @@ function render(timeMs) {
   const timeSec = timeMs * 0.001 * attrs.speed
 
 
-  programs.forEach((coords, i) => {
+  const drawProgram = (coords, i) => {
     const { a_position, u_time, u_animScale, u_aspect, u_offset, u_color, u_rotation, program, vertexCount, buffer } = coords
     gl.useProgram(program)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
@@ -231,7 +262,7 @@ function render(timeMs) {
     const animScale2 = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
 
 
-// console.log(attrs.rotation, animScale2, (attrs.rotation * animScale2/81))
+    // console.log(attrs.rotation, animScale2, (attrs.rotation * animScale2/81))
 
 
     function drawVertex(scale, r=1, g=1, b=1, a=1) {
@@ -242,38 +273,58 @@ function render(timeMs) {
     }
 
 
-    const animProgress = 3*animScale/128;
+    const animProgress = 3*animScale/128; // btwn 0-3
 
-    ({r, g, b} = hsvToRgb(attrs.startHue + (animProgress * 130), 0.4  + 0.35 * animProgress, 1))
+
+
+
+    let {r, g, b} = colorStrategy(animProgress, i, frame)
+
+    // ({r, g, b} = hsvToRgb(attrs.startHue + (animProgress * 130), 0.4  + 0.35 * animProgress, 1))
 
     // if (frame % 120 === 0 && i % 4 === 0) console.log(r, g, b)
 
     if (attrs.aura) drawVertex(25 , 1, 1, 1, 0.5)
     // drawVertex(24.975 , 1, 1, 1, 0.5)
 
-    const shadows = attrs.lines === 'glowing' ? 12 : 8
-    const lineSpace = attrs.lines === 'glowing' ? 0.0025 : 0.00125
+    const shadows = 12
+    const lineSpace = 0.0025
+
+    const aMod = ((Math.sin((frame - (i * attrs.brainwave * 4))/60) + 1) / 2) * 0.9 + 0.1
+    const scaleMod = attrs.hasPump ? 1 + Math.sin((frame - (i * attrs.brainwave * 4))/60)/10 : 1
+
+
+
 
     times(shadows, t => {
-      const a = attrs.lines === 'glowing' ? 0.4 - (t * (0.4/shadows)) : 1
-      drawVertex(1 - (t * lineSpace), r, g, b, a)
+      const a = (0.4 - (t * (0.4/shadows))) * aMod
+      drawVertex(1 * scaleMod - (t * lineSpace), r, g, b, a)
     })
 
     times(shadows, t => {
-      const a = attrs.lines === 'glowing' ? 0.4 - (t * (0.4/shadows)) : 1
-      drawVertex(1 + (t * lineSpace), r, g, b, a)
+      const a = (0.4 - (t * (0.4/shadows))) * aMod
+      drawVertex(1 * scaleMod + (t * lineSpace), r, g, b, a)
     })
 
 
-// TODO
-  // rings should fade out instead of hard disappear
+    // TODO
+    // rings should fade out instead of hard disappear
 
 
-    drawVertex(1, r, g, b, 0.8)
-    drawVertex(1.0025, r, g, b, 0.8)
+    drawVertex(1 * scaleMod, r, g, b, 0.8 * aMod)
+    drawVertex(1.0025 * scaleMod, r, g, b, 0.8 * aMod)
     // drawVertex(1.005, 1, 0, 0, 1)
+
+    if (attrs.hasAura) {
+      const scaleMod2 = (Math.sin((frame - i)/60) + 1) / 10
+      const auraAMod = Math.min(0, Math.cos((frame - i)/60) + Math.PI * 0.1)
+      drawVertex(1 * scaleMod2, r, g, b, 0.8 * aMod + auraAMod)
+    }
+
     // drawVertex(1.0075, 1, 0, 0, 1)
-  })
+  }
+
+  programs.forEach(drawProgram)
 
 
   requestAnimationFrame(render)

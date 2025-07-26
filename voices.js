@@ -1,4 +1,4 @@
-// import {queryParams} from './$.js'
+import {CONTROL_STATE} from './controls.js'
 
 window.speechSynthesis?.cancel?.()
 
@@ -30,6 +30,7 @@ export const voices = new Promise((res, rej) => {
 
 
 export function say(voice, txt, options={}) {
+  if (!CONTROL_STATE.affirmations) return
 
   let v
   try {

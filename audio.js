@@ -1,6 +1,6 @@
 
 
-export const MAX_VOLUME = 0.04
+export const MAX_VOLUME = 0.08
 
 export const allSources = []
 export function createSource(waveType = 'square', startingFreq=3000) {
