@@ -3,7 +3,7 @@
 export const MAX_VOLUME = 0.08
 
 export const allSources = []
-export function createSource(waveType = 'square', startingFreq=3000) {
+export function createSource(waveType = 'sine', startingFreq=3000) {
   const AudioContext = window.AudioContext || window.webkitAudioContext
   const ctx = new AudioContext()
 

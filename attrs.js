@@ -1,4 +1,5 @@
 const speed = 0.75
+// const speed = 2
 // const speed = 0
 const rotation = prb(.1) ? rnd(4) : 0
 const aura = prb(0.1)
@@ -61,6 +62,10 @@ const brainwave = brainwaves[bw]
 
 const hasAura = prb(0.1)
 const hasPump = prb(0.1)
+
+const emojiStrat = chance(
+  [1, '']
+)
 
 
 /*

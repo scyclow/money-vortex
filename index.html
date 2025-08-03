@@ -265,7 +265,7 @@ function render(timeMs) {
     // console.log(attrs.rotation, animScale2, (attrs.rotation * animScale2/81))
 
 
-    function drawVertex(scale, r=1, g=1, b=1, a=1) {
+    function drawVertex(scale, animScale, r=1, g=1, b=1, a=1) {
       gl.uniform1f(u_rotation, attrs.rotationDirection * (attrs.rotation * animScale2/81)**.8)
       gl.uniform1f(u_animScale, animScale * scale)
       gl.uniform4f(u_color, r, g, b, a)
@@ -284,26 +284,49 @@ function render(timeMs) {
 
     // if (frame % 120 === 0 && i % 4 === 0) console.log(r, g, b)
 
-    if (attrs.aura) drawVertex(25 , 1, 1, 1, 0.5)
-    // drawVertex(24.975 , 1, 1, 1, 0.5)
+    if (attrs.aura) drawVertex(25, animScale, 1, 1, 1, 0.5)
+    // drawVertex(24.975 , animScale, 1, 1, 1, 0.5)
 
     const shadows = 12
     const lineSpace = 0.0025
 
-    const aMod = ((Math.sin((frame - (i * attrs.brainwave * 4))/60) + 1) / 2) * 0.9 + 0.1
-    const scaleMod = attrs.hasPump ? 1 + Math.sin((frame - (i * attrs.brainwave * 4))/60)/10 : 1
+    const sinProgress =  Math.PI * 2 * i / programs.length
 
 
+
+    // const pumpFactor = getPumpFactor(i, frame)
+    const phase = (frame - i * 10) / (programs.length * 5) // repeat every 5s
+
+    const pumpFactor = Math.sin(
+      // (frame - (i * attrs.brainwave * 4))
+      2 * Math.PI * phase
+    )
+
+    if (frame % 180 === 0 && (i === 0 || i === programs.length-1 || i === 1 || i === programs.length-2)) console.log(i, pumpFactor)
+
+    // Math.sin((
+    //   frame + sinProgress * i * 4
+    // )/60)
+
+
+
+
+
+
+    const aMod = ((pumpFactor + 1) / 2) * 0.9 + 0.1
+    const scaleMod = attrs.hasPump
+      ? 1 + pumpFactor/10
+      : 1
 
 
     times(shadows, t => {
       const a = (0.4 - (t * (0.4/shadows))) * aMod
-      drawVertex(1 * scaleMod - (t * lineSpace), r, g, b, a)
+      drawVertex(1 * scaleMod - (t * lineSpace), animScale, r, g, b, a)
     })
 
     times(shadows, t => {
       const a = (0.4 - (t * (0.4/shadows))) * aMod
-      drawVertex(1 * scaleMod + (t * lineSpace), r, g, b, a)
+      drawVertex(1 * scaleMod + (t * lineSpace), animScale, r, g, b, a)
     })
 
 
@@ -311,8 +334,14 @@ function render(timeMs) {
     // rings should fade out instead of hard disappear
 
 
-    drawVertex(1 * scaleMod, r, g, b, 0.8 * aMod)
-    drawVertex(1.0025 * scaleMod, r, g, b, 0.8 * aMod)
+    drawVertex(1 * scaleMod, animScale, r, g, b, 0.8 * aMod)
+    drawVertex(1.0025 * scaleMod, animScale, r, g, b, 0.8 * aMod)
+
+
+
+
+
+
     // drawVertex(1.005, 1, 0, 0, 1)
 
     if (attrs.hasAura) {
@@ -350,11 +379,71 @@ document.onclick = () => {
 }
 
 
+const style = document.createElement('style');
+document.body.appendChild(style);
 
-// const style = document.createElement('style');
-// document.body.appendChild(style);
+style.textContent = `
+  .emoji {
+    animation: DancingFading 12s linear infinite;
+    font-size: 10vmin;
+  }
 
-// style.textContent = `
+
+
+
+      @keyframes DancingFading {
+        0%, 100% {
+          opacity: 0;
+        }
+
+        22% {
+          transform: rotate(30deg);
+        }
+        33% {
+          opacity: 0;
+          transform: rotate(-30deg);
+        }
+        40% {
+          opacity: 1;
+        }
+        44% {
+          transform: rotate(30deg);
+        }
+        55% {
+          transform: rotate(-30deg);
+        }
+        60% {
+          opacity: 1;
+        }
+        66% {
+          opacity: 0;
+          transform: rotate(30deg);
+        }
+        77% {
+          transform: rotate(-30deg);
+        }
+      }
+`
+
+const emojiLayer = document.createElement('div');
+
+emojiLayer.style.position = 'absolute'
+emojiLayer.style.top = '0'
+emojiLayer.style.bottom = '0'
+emojiLayer.style.width = '100vw'
+emojiLayer.style.height = '100vh'
+
+emojiLayer.style.display = 'flex'
+emojiLayer.style.justifyContent = 'center'
+emojiLayer.style.alignItems = 'center'
+
+
+// emojiLayer.innerHTML = `<div class="emoji">🤑</div>`
+
+
+
+
+
 //   .dollar {
 //     position: absolute;
 //     animation: blink 6s infinite;
@@ -399,6 +488,7 @@ document.onclick = () => {
 
 
   document.body.appendChild(canvas);
+  document.body.appendChild(emojiLayer);
 
 
 
