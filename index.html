@@ -302,6 +302,9 @@ function render(timeMs) {
       2 * Math.PI * phase
     )
 
+
+    // const pumpFactor = Math.sin((frame - (i * attrs.brainwave * 4)) / 60)
+
     if (frame % 180 === 0 && (i === 0 || i === programs.length-1 || i === 1 || i === programs.length-2)) console.log(i, pumpFactor)
 
     // Math.sin((
@@ -438,7 +441,7 @@ emojiLayer.style.justifyContent = 'center'
 emojiLayer.style.alignItems = 'center'
 
 
-// emojiLayer.innerHTML = `<div class="emoji">🤑</div>`
+emojiLayer.innerHTML = `<div class="emoji">🤑</div>`
 
 
 
