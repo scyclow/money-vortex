@@ -27,9 +27,9 @@ function keyEvent(key) {
     CONTROL_STATE.popups = !CONTROL_STATE.popups
 
     if (CONTROL_STATE.popups) {
-      popupStyle.textContent = `.popup { display: inline-block }`
+      popupStyle.textContent = `.sc-window { display: inline-block }`
     } else {
-      popupStyle.textContent = `.popup { display: none }`
+      popupStyle.textContent = `.sc-window { display: none }`
 
     }
   }

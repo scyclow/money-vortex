@@ -461,8 +461,8 @@ function displayPopup() {
 
   if (CONTROL_STATE.popups) {
     const newPopup = document.createElement('div')
-    newPopup.id = `ad-${adCount}`
-    newPopup.className = `popup`
+    newPopup.id = `sc-window-${adCount}`
+    newPopup.className = `sc-window`
 
     newPopup.style = `
       max-width: 200px;
@@ -480,15 +480,15 @@ function displayPopup() {
     `
     newPopup.innerHTML = `
     <div>
-      <div style="cursor: pointer; text-align: right; font-size: 0.5em" id="ad-${adCount}-x">X</div>
+      <div style="cursor: pointer; text-align: right; font-size: 0.5em" id="sc-window-${adCount}-x">X</div>
       <a href="${adContent.href}" target="_blanke" rel="nofollow">${adContent.copy}</a>
     </div>`
 
 
 
     document.body.appendChild(newPopup);
-    console.log(`ad-${adCount}-x`)
-    document.getElementById(`ad-${adCount}-x`).onclick = () => {
+    console.log(`sc-window-${adCount}-x`)
+    document.getElementById(`sc-window-${adCount}-x`).onclick = () => {
       newPopup.remove()
     }
     adCount++
