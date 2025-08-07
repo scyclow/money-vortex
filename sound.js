@@ -152,6 +152,19 @@ export const activateSound = async () => {
 
 
   if (sayAffirmations) {
-    setInterval(() => say(defaultVoice, sample(affirmations), { speed: 0.9 }), 10000)
+
+    let lastAffirmation
+    function triggerAffirmation() {
+      const aff = sample(affirmations)
+
+      if (aff === lastAffirmation) {
+        triggerAffirmation()
+      } else {
+        lastAffirmation = aff
+        say(defaultVoice, aff, { speed: 0.9 })
+      }
+
+    }
+    setInterval(triggerAffirmation, 10000)
   }
 }

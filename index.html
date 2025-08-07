@@ -73,6 +73,8 @@
   import {coordsList, props} from './coordinates.js'
   import {createProgram} from './shaderBoilerplate.js'
   import {activateSound} from './sound.js'
+  import {CONTROL_STATE} from './controls.js'
+
 
 
   const canvas = document.createElement('canvas');
@@ -305,7 +307,7 @@ function render(timeMs) {
 
     // const pumpFactor = Math.sin((frame - (i * attrs.brainwave * 4)) / 60)
 
-    if (frame % 180 === 0 && (i === 0 || i === programs.length-1 || i === 1 || i === programs.length-2)) console.log(i, pumpFactor)
+    // if (frame % 180 === 0 && (i === 0 || i === programs.length-1 || i === 1 || i === programs.length-2)) console.log(i, pumpFactor)
 
     // Math.sin((
     //   frame + sinProgress * i * 4
@@ -441,9 +443,65 @@ emojiLayer.style.justifyContent = 'center'
 emojiLayer.style.alignItems = 'center'
 
 
-emojiLayer.innerHTML = `<div class="emoji">🤑</div>`
+emojiLayer.innerHTML = `<div id="emojiView" class="emoji">🤑</div>`
 
 
+
+let adCount = 0
+function displayPopup() {
+  const adContent = sample([
+    { copy: `MAKE FAST CASH NOW`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `THIS IS THE OPPORTUNITY YOU'VE BEEN LOOKING FOR`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `YOUR SHIP HAS FINALLY COME IN`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `LEARN THE SECRET TRICK MILLIONARES DON'T WANT YOU TO KNOW ABOUT`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `10X YOUR WEALTH WITH THIS ONE TRICK`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `WAKE UP TO A RICHER TOMORROW`, href: 'https://fastcashmoneyplus.biz'},
+  ])
+
+
+  if (CONTROL_STATE.popups) {
+    const newPopup = document.createElement('div')
+    newPopup.id = `ad-${adCount}`
+    newPopup.className = `popup`
+
+    newPopup.style = `
+      max-width: 200px;
+      background: #fff;
+      border: 2px solid #000;
+      padding: 0.5em;
+      padding-bottom: 0.75em;
+      font-size: 1.5em;
+      position: absolute;
+      top: ${rnd(0, 85)}vh;
+      left: calc(${rnd(15, 100)}vw - 200px);
+      z-index: 2;
+      font-family: sans-serif;
+      text-align: center
+    `
+    newPopup.innerHTML = `
+    <div>
+      <div style="cursor: pointer; text-align: right; font-size: 0.5em" id="ad-${adCount}-x">X</div>
+      <a href="${adContent.href}" target="_blanke" rel="nofollow">${adContent.copy}</a>
+    </div>`
+
+
+
+    document.body.appendChild(newPopup);
+    console.log(`ad-${adCount}-x`)
+    document.getElementById(`ad-${adCount}-x`).onclick = () => {
+      newPopup.remove()
+    }
+    adCount++
+  }
+
+  setTimeout(() => {
+    displayPopup()
+  }, rnd(1000, 3000) * attrs.adRate)
+
+
+}
+
+displayPopup()
 
 
 
@@ -494,6 +552,11 @@ emojiLayer.innerHTML = `<div class="emoji">🤑</div>`
   document.body.appendChild(emojiLayer);
 
 
+  if (CONTROL_STATE.emojis) {
+    document.getElementById('emojiView').style.display = 'initial'
+  } else {
+    document.getElementById('emojiView').style.display = 'none'
+  }
 
 
 </script>

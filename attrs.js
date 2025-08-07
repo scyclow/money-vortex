@@ -62,6 +62,7 @@ const brainwave = brainwaves[bw]
 
 const hasAura = prb(0.1)
 const hasPump = prb(0.1)
+const adRate = 5
 
 const emojiStrat = chance(
   [1, '']
@@ -98,7 +99,7 @@ const emojiStrat = chance(
 
 const attrs = {
   speed, rotation, rotationDirection, startHue, rosetteType, radiaChange, bgColor, colorStrategy, layerMult,
-  alternateThickness, alternateHues, brainwave, hasAura, hasPump
+  alternateThickness, alternateHues, brainwave, hasAura, hasPump, adRate
 }
 
 console.log(attrs)
