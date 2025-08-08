@@ -3,8 +3,6 @@ import {CONTROL_STATE} from './controls.js'
 window.speechSynthesis?.cancel?.()
 
 
-let syncVoices = []
-
 export const voices = new Promise((res, rej) => {
   setTimeout(() => {
     let i = 0
@@ -16,8 +14,9 @@ export const voices = new Promise((res, rej) => {
         setTimeout(() => {
           if (!voices.length) getVoices()
           else {
-            syncVoices = voices
-            res(voices)
+            const englishVoices = voices.filter(v => v.lang === 'en-US' || v.lang === 'en_US')
+
+            res(englishVoices.length ? englishVoices : voices)
           }
         }, 200)
       } catch(e) {

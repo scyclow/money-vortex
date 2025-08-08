@@ -1,11 +1,12 @@
 
 import {MAX_VOLUME, SoundSrc} from './audio.js'
+import {CONTROL_STATE} from './controls.js'
+
 import {voices, say} from './voices.js'
 import affirmations from './affirmations.js'
 import attrs from './attrs.js'
 
 
-const sayAffirmations = true
 
 
 const somberNotes = {
@@ -39,16 +40,35 @@ const hopefulNotes = {
 
 
 
+const optimisticNotes = {
+  f4: 349.23,
+  as4: 466.16,
+  d5: 587.33,
+  // a4: 440,
+  // cs5: 554.37,
+  f5: 698.46
 
-const notes = prb(0.5)
-  ? {
+  // a4: 440,
+  // d5: 587.33,
+  // e5: 329.63*2,
+  // a5: 440*2,
+
+}
+
+
+
+
+
+const notes = sample([
+  {
     main: hopefulNotes.a4,
     secondary: Object.values(hopefulNotes)
-  }
-  : {
+  },
+  {
     main: somberNotes.b4,
     secondary: Object.values(somberNotes)
-  }
+  },
+])
 
 
 
@@ -90,32 +110,37 @@ function playTone(t, vol=MAX_VOLUME) {
   }
 }
 
+let soundActivated, soundMuted
+
+
 
 
 function playSecondaryNote(secondary, changeInterval, exclude=[], changeTimeout=0) {
   let i = 0
 
   function changeSound(s) {
-    const vol = i % 2 ? MAX_VOLUME : 0
+    if (!soundMuted) {
+      const vol = i % 2 ? MAX_VOLUME : 0
 
-    if (vol) {
-      const x = sample(notes.secondary, exclude)
+      if (vol) {
+        const x = sample(notes.secondary, exclude)
 
-      const newNote = getTone(x)
+        const newNote = getTone(x)
 
-      secondary.leftChannel.smoothFreq(newNote.toneM/4, 0.25)
-      secondary.rightChannel.smoothFreq(newNote.toneM*0.75, 0.25)
-      secondary.middle1Channel.smoothFreq(newNote.toneM, 0.25)
-      secondary.middle2Channel.smoothFreq(newNote.toneM/2, 0.25)
+        secondary.leftChannel.smoothFreq(newNote.toneM/4, 0.25)
+        secondary.rightChannel.smoothFreq(newNote.toneM*0.75, 0.25)
+        secondary.middle1Channel.smoothFreq(newNote.toneM, 0.25)
+        secondary.middle2Channel.smoothFreq(newNote.toneM/2, 0.25)
+      }
+
+
+      secondary.leftChannel.smoothGain(vol, 2)
+      secondary.rightChannel.smoothGain(vol, 2)
+      secondary.middle1Channel.smoothGain(vol, 2)
+      secondary.middle2Channel.smoothGain(vol, 2)
+      i++
+
     }
-
-
-    secondary.leftChannel.smoothGain(vol, 2)
-    secondary.rightChannel.smoothGain(vol, 2)
-    secondary.middle1Channel.smoothGain(vol, 2)
-    secondary.middle2Channel.smoothGain(vol, 2)
-    i++
-
     const nextChange = changeInterval
 
     setTimeout(() => changeSound(nextChange/2000), nextChange)
@@ -127,10 +152,31 @@ function playSecondaryNote(secondary, changeInterval, exclude=[], changeTimeout=
 }
 
 
-export const activateSound = async () => {
-  const vs = await voices
 
-  const defaultVoice = vs.find(v => v.lang === 'en-US' || v.lang === 'en_US') || vs[0]
+
+function unmuteSound() {
+  soundMuted = false
+  SoundSrc.allSources.forEach(src => src.unmute(0.2))
+
+}
+
+
+export function muteSound() {
+  soundMuted = true
+  SoundSrc.allSources.forEach(src => src.mute(0.2))
+  // window.speechSynthesis?.cancel?.()
+}
+
+
+
+export async function activateSound() {
+  if (soundActivated) {
+    unmuteSound()
+    return
+  }
+
+  soundActivated = true
+  const vs = await voices
 
   // TODO
     // main volume shoudl sort of fade in and out
@@ -138,8 +184,8 @@ export const activateSound = async () => {
 
   const main = playTone(notes.main)
 
-  main.leftChannel.smoothGain(MAX_VOLUME/2)
-  main.rightChannel.smoothGain(MAX_VOLUME/2)
+  main.leftChannel.smoothGain(MAX_VOLUME/2, 0.2)
+  main.rightChannel.smoothGain(MAX_VOLUME/2, 0.2)
 
   const secondary = playTone(sample(notes.secondary, main), MAX_VOLUME* 1.25)
   const tertiary = playTone(sample(notes.secondary, [main, secondary]), MAX_VOLUME* 1.25)
@@ -151,20 +197,24 @@ export const activateSound = async () => {
 
 
 
-  if (sayAffirmations) {
+  let lastAffirmation
+  function triggerAffirmation() {
+    if (soundMuted) return
+    const aff = sample(affirmations)
 
-    let lastAffirmation
-    function triggerAffirmation() {
-      const aff = sample(affirmations)
-
-      if (aff === lastAffirmation) {
-        triggerAffirmation()
-      } else {
-        lastAffirmation = aff
-        say(defaultVoice, aff, { speed: 0.9 })
-      }
-
+    if (aff === lastAffirmation) {
+      triggerAffirmation()
+    } else {
+      lastAffirmation = aff
+      const voice = vs[CONTROL_STATE.affirmationVoiceIx || 0]
+      say(voice, aff, { speed: CONTROL_STATE.affirmationSpeed || 0.9 })
     }
-    setInterval(triggerAffirmation, 10000)
   }
+
+  setInterval(triggerAffirmation, 10000)
+
+
 }
+
+
+

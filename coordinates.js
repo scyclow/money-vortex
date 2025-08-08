@@ -3,7 +3,7 @@ import attrs from './attrs.js'
 
 const typeFunctions = {
   normal() {
-    const points = 900
+    const points = 1800
     const gearWaveFrequency = 4
     const gearWaveAmplitude = 0
 

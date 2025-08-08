@@ -72,8 +72,9 @@
 
   import {coordsList, props} from './coordinates.js'
   import {createProgram} from './shaderBoilerplate.js'
-  import {activateSound} from './sound.js'
+  import {activateSound, muteSound} from './sound.js'
   import {CONTROL_STATE} from './controls.js'
+  import {displayEmojis} from './emojis.js'
 
 
 
@@ -268,9 +269,12 @@ function render(timeMs) {
 
 
     function drawVertex(scale, animScale, r=1, g=1, b=1, a=1) {
+      const progress = animScale/128 // btwn 0-1
+      const alphaDetractor = Math.max(0, (progress - 0.6) * 5)
+
       gl.uniform1f(u_rotation, attrs.rotationDirection * (attrs.rotation * animScale2/81)**.8)
       gl.uniform1f(u_animScale, animScale * scale)
-      gl.uniform4f(u_color, r, g, b, a)
+      gl.uniform4f(u_color, r, g, b, a - alphaDetractor)
       gl.drawArrays(gl.LINE_STRIP, 0, vertexCount)
     }
 
@@ -350,9 +354,9 @@ function render(timeMs) {
     // drawVertex(1.005, 1, 0, 0, 1)
 
     if (attrs.hasAura) {
-      const scaleMod2 = (Math.sin((frame - i)/60) + 1) / 10
+      const scaleMod2 = (Math.sin((frame - i)/60) + 10)
       const auraAMod = Math.min(0, Math.cos((frame - i)/60) + Math.PI * 0.1)
-      drawVertex(1 * scaleMod2, r, g, b, 0.8 * aMod + auraAMod)
+      drawVertex(1 * scaleMod2, animScale, r, g, b, 0.8 * aMod + auraAMod)
     }
 
     // drawVertex(1.0075, 1, 0, 0, 1)
@@ -371,79 +375,21 @@ requestAnimationFrame(render)
 
 let soundActivated = false
 
-document.body.style.cursor = 'pointer'
+canvas.style.cursor = 'pointer'
 document.body.style.backgroundColor = rgbNormalizedToHex(attrs.bgColor)
 canvas.style.backgroundColor = `hsl(${rnd(360)}deg, 100%, ${rnd(100)}%)`
 
 
-document.onclick = () => {
+canvas.onclick = () => {
   if (!soundActivated) {
     activateSound()
     soundActivated = true
+  } else {
+    muteSound()
+    soundActivated = false
   }
 }
 
-
-const style = document.createElement('style');
-document.body.appendChild(style);
-
-style.textContent = `
-  .emoji {
-    animation: DancingFading 12s linear infinite;
-    font-size: 10vmin;
-  }
-
-
-
-
-      @keyframes DancingFading {
-        0%, 100% {
-          opacity: 0;
-        }
-
-        22% {
-          transform: rotate(30deg);
-        }
-        33% {
-          opacity: 0;
-          transform: rotate(-30deg);
-        }
-        40% {
-          opacity: 1;
-        }
-        44% {
-          transform: rotate(30deg);
-        }
-        55% {
-          transform: rotate(-30deg);
-        }
-        60% {
-          opacity: 1;
-        }
-        66% {
-          opacity: 0;
-          transform: rotate(30deg);
-        }
-        77% {
-          transform: rotate(-30deg);
-        }
-      }
-`
-
-const emojiLayer = document.createElement('div');
-
-emojiLayer.style.position = 'absolute'
-emojiLayer.style.top = '0'
-emojiLayer.style.bottom = '0'
-emojiLayer.style.width = '100vw'
-emojiLayer.style.height = '100vh'
-
-emojiLayer.style.display = 'flex'
-emojiLayer.style.justifyContent = 'center'
-emojiLayer.style.alignItems = 'center'
-
-
-emojiLayer.innerHTML = `<div id="emojiView" class="emoji">🤑</div>`
 
 
 
@@ -452,10 +398,12 @@ function displayPopup() {
   const adContent = sample([
     { copy: `MAKE FAST CASH NOW`, href: 'https://fastcashmoneyplus.biz'},
     { copy: `THIS IS THE OPPORTUNITY YOU'VE BEEN LOOKING FOR`, href: 'https://fastcashmoneyplus.biz'},
-    { copy: `YOUR SHIP HAS FINALLY COME IN`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `YOUR SHIP HAS FINALLY COME IN`, href: 'https://0ms.co/cruise-winner.html"'},
     { copy: `LEARN THE SECRET TRICK MILLIONARES DON'T WANT YOU TO KNOW ABOUT`, href: 'https://fastcashmoneyplus.biz'},
     { copy: `10X YOUR WEALTH WITH THIS ONE TRICK`, href: 'https://fastcashmoneyplus.biz'},
     { copy: `WAKE UP TO A RICHER TOMORROW`, href: 'https://fastcashmoneyplus.biz'},
+    { copy: `LEARN ABOUT THE MONEY-MAKING OPPORTUNITY OF A LIFETIME`, href: 'https://moneymakingopportunity.eth.limo'},
+    { copy: `MANIFESTING WEALTH HAS NEVER BEEN EASIER`, href: 'https://moneymakingopportunity.eth.limo'},
   ])
 
 
@@ -476,7 +424,7 @@ function displayPopup() {
       left: calc(${rnd(15, 100)}vw - 200px);
       z-index: 2;
       font-family: sans-serif;
-      text-align: center
+      text-align: center;
     `
     newPopup.innerHTML = `
     <div>
@@ -548,16 +496,18 @@ displayPopup()
 // }
 
 
-  document.body.appendChild(canvas);
-  document.body.appendChild(emojiLayer);
+  document.body.appendChild(canvas)
+  displayEmojis()
 
-
-  if (CONTROL_STATE.emojis) {
-    document.getElementById('emojiView').style.display = 'initial'
-  } else {
-    document.getElementById('emojiView').style.display = 'none'
-  }
-
+  console.log('Enter the Money Vortex')
+  console.log(`Controls:
+    Click: Toggle sound
+    "a": Toggle affirmations
+    "p": Toggle popups
+    "e": Toggle emojis
+    "←": Switch affirmation voice
+    "→": Switch affirmation voice
+  `)
 
 </script>
 

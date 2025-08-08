@@ -18,7 +18,7 @@ const rosetteType = chance(
   [1, 'wavey'],
   [1, 'numismatic'],
 )
-console.log(rosetteType)
+
 
 const radiaChange = rnd(0.01, 0.2)
 
@@ -60,14 +60,22 @@ const brainwaves = {
 const bw = sample(Object.keys(brainwaves))
 const brainwave = brainwaves[bw]
 
-const hasAura = prb(0.1)
-const hasPump = prb(0.1)
-const adRate = 5
+const hasAura = prb(0.1) && !rotation
 
-const emojiStrat = chance(
-  [1, '']
+const hasPump = prb(0.1)
+const adRate = chance(
+  [1, rnd(1, 3)],
+  [4, rnd(5, 10)],
+  [25, rnd(30)],
 )
 
+const emojiStrategy = chance(
+  [1, 'fadeDance'],
+  [1, 'growShrink'],
+  [1, 'float'],
+)
+
+const emoji = sample(['💸', '💰', '💎', '🪙', '🤑', '💷', '💴', '💵', '💶', '💲', '💰', '💹', '📈', '🍀'])
 
 /*
   Color Strategy
@@ -99,7 +107,7 @@ const emojiStrat = chance(
 
 const attrs = {
   speed, rotation, rotationDirection, startHue, rosetteType, radiaChange, bgColor, colorStrategy, layerMult,
-  alternateThickness, alternateHues, brainwave, hasAura, hasPump, adRate
+  alternateThickness, alternateHues, brainwave, hasAura, hasPump, adRate, emoji, emojiStrategy
 }
 
 console.log(attrs)

@@ -2,7 +2,7 @@
 
 export const MAX_VOLUME = 0.08
 
-export const allSources = []
+
 export function createSource(waveType = 'sine', startingFreq=3000) {
   const AudioContext = window.AudioContext || window.webkitAudioContext
   const ctx = new AudioContext()
@@ -45,44 +45,43 @@ export function createSource(waveType = 'sine', startingFreq=3000) {
     )
   }
 
-  const mute = () => {
-    gain.gain.setTargetAtTime(
-      Math.min(0, MAX_VOLUME),
-      ctx.currentTime,
-      0.001
-    )
-  }
-  const unmute = () => {
-    gain.gain.setTargetAtTime(
-      Math.min(volume, MAX_VOLUME),
-      ctx.currentTime,
-      0.001
-    )
-  }
+  // const mute = () => {
+  //   gain.gain.setTargetAtTime(
+  //     Math.min(0, MAX_VOLUME),
+  //     ctx.currentTime,
+  //     0.001
+  //   )
+  // }
+  // const unmute = () => {
+  //   gain.gain.setTargetAtTime(
+  //     Math.min(volume, MAX_VOLUME),
+  //     ctx.currentTime,
+  //     0.001
+  //   )
+  // }
 
   const src = {
-    source, gain, panner,smoothFreq, smoothGain, smoothPanner, originalSrcType: source.type, mute, unmute,
+    source, gain, panner,smoothFreq, smoothGain, smoothPanner, originalSrcType: source.type, //mute, unmute,
     stop() {
       source.stop()
       this.isStopped = true
     }
   }
 
-  allSources.push(src)
-
   return src
 }
 
 
-window.allSources = allSources
 
 
 // EXPERIMENTAL
 
 
 export class SoundSrc {
+  static allSources = []
   constructor(waveType='sine', startingFreq=440) {
     Object.assign(this, createSource(waveType, startingFreq))
+    SoundSrc.allSources.push(this)
   }
 
   max() {
@@ -93,9 +92,18 @@ export class SoundSrc {
     this.smoothGain(0)
   }
 
+  mute(ms) {
+    this.lastVolume = this.gain.gain.value
+    this.smoothGain(0, ms)
+  }
 
-  async note(freq, ms) {
-    this.smoothGain(MAX_VOLUME)
+  unmute(ms) {
+    this.smoothGain(this.lastVolume || MAX_VOLUME, ms)
+  }
+
+
+  async note(freq, ms, vol) {
+    this.smoothGain(vol || MAX_VOLUME)
     this.smoothFreq(freq)
     await waitPromise(ms)
     this.smoothGain(0)

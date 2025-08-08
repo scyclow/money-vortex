@@ -1,7 +1,11 @@
+import {voices} from './voices.js'
+
 export const CONTROL_STATE = {
   affirmations: true,
-  emojis: false,
+  emojis: true,
   popups: false,
+  affirmationVoiceIx: 0,
+  affirmationSpeed: 0.9,
 }
 
 const popupStyle = document.createElement('style')
@@ -32,7 +36,23 @@ function keyEvent(key) {
       popupStyle.textContent = `.sc-window { display: none }`
 
     }
+  } else if (key === 'ArrowRight') {
+    voices.then(vs => {
+      CONTROL_STATE.affirmationVoiceIx = (CONTROL_STATE.affirmationVoiceIx + 1) % vs.length
+      console.log(vs.length, CONTROL_STATE.affirmationVoiceIx)
+    })
+  } else if (key === 'ArrowLeft') {
+    voices.then(vs => {
+      CONTROL_STATE.affirmationVoiceIx = (CONTROL_STATE.affirmationVoiceIx - 1 + vs.length )% vs.length
+      console.log(vs.length, CONTROL_STATE.affirmationVoiceIx)
+    })
+  } else if (key === 'ArrowUp') {
+    CONTROL_STATE.affirmationSpeed += 0.1
+  } else if (key === 'ArrowDown') {
+    CONTROL_STATE.affirmationSpeed = Math.max(0.1, CONTROL_STATE.affirmationSpeed - 0.1)
   }
+
+  console.log(CONTROL_STATE)
 }
 
 document.onkeydown = e => keyEvent(e.key)
