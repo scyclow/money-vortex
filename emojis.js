@@ -134,17 +134,14 @@ if (attrs.emoji === 'CGK') {
 
 export function displayEmoji() {
   emojiLayer.style.opacity = 1
-  console.log('displayEmoji')
 }
 
 export function hideEmoji() {
   emojiLayer.style.opacity = 0
-  console.log('hideEmoji')
 }
 
 export function mountEmoji() {
   document.body.appendChild(emojiLayer);
-console.log('mounted')
 
   setTimeout(() => {
     hideEmoji()

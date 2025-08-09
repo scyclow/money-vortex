@@ -87,8 +87,6 @@ function keyEvent(key) {
   } else if (key === 'ArrowDown') {
     CONTROL_STATE.affirmationSpeed = Math.max(0.1, CONTROL_STATE.affirmationSpeed - 0.1)
   }
-
-  console.log(CONTROL_STATE)
 }
 
 document.onkeydown = e => keyEvent(e.key)
