@@ -6,6 +6,8 @@ import attrs from './attrs.js'
   import {CONTROL_STATE} from './controls.js'
   import {mountEmoji} from './emojis.js'
   import {displayPopup} from './sponsoredContent.js'
+import {mantras} from './affirmations.js'
+
 
 
 
@@ -371,6 +373,33 @@ canvas.onclick = () => {
 // }
 
 
+
+
+
+const mantra = mantras[tokenData.tokenId]
+
+
+const $html = document.getElementsByTagName('html')[0]
+const addMetaTag = (args) => {
+  const meta = document.createElement('meta')
+  Object.keys(args).forEach(arg => {
+    meta[arg] = args[arg]
+  })
+
+  document.head.appendChild(meta)
+}
+
+
+$html.translate = false
+$html.lang = 'en'
+$html.className = 'notranslate'
+
+document.title = `Money Vortex #${tokenData.tokenId}: ${mantra}`
+
+addMetaTag({ name: 'google', content: 'notranslate'})
+addMetaTag({ charset: 'utf-8' })
+
+
   document.body.appendChild(canvas)
   mountEmoji()
   displayPopup()
@@ -386,6 +415,7 @@ canvas.onclick = () => {
     "3": Speed: fast
     "4": Speed: very fast
     "5": Speed: dangerously fast
+    "0": Speed: paused
     "H": Always display mantra
     "r": Reset all controls
     "←": Switch affirmation voice

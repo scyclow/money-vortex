@@ -55,6 +55,9 @@ function keyEvent(key) {
     displayEmoji()
     console.log(`Emojis locked`)
 
+  } else if (key === '0') {
+    CONTROL_STATE.speedModifer = 0
+
   } else if (key === '1') {
     CONTROL_STATE.speedModifer = 0.5
   } else if (key === '2') {
