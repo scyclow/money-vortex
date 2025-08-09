@@ -59,55 +59,42 @@ const brainwaves = {
 
 const bw = sample(Object.keys(brainwaves))
 const brainwave = brainwaves[bw]
+const toneAdj = rnd(0.5, 1.5) / 2
+
 
 const hasAura = prb(0.1) && !rotation
 
 const hasPump = prb(0.1)
 const adRate = chance(
-  [1, rnd(1, 3)],
-  [4, rnd(5, 10)],
-  [25, rnd(30)],
+  [1, [20, 60]],
+  [4, [60, 150]],
+  [44, [150,360]],
 )
 
 const emojiStrategy = chance(
-  [1, 'fadeDance'],
+  [1, 'dance'],
   [1, 'growShrink'],
-  [1, 'float'],
+  // [1, 'float'],
+  // [1, 'fadeInOut'],
 )
 
-const emoji = sample(['💸', '💰', '💎', '🪙', '🤑', '💷', '💴', '💵', '💶', '💲', '💰', '💹', '📈', '🍀'])
 
-/*
-  Color Strategy
-    - pure
-    - gradient
-    - alternating
-
-    - change over time
+const emoji = sample(['💸', '💰', '💎', '🪙', '🤑', '💷', '💴', '💵', '💶', '💲', '💰', '💹', '📈', '🍀', 'CGK'])
+const emojiInvert = prb(0.3)
 
 
-  Lines
-    - solid
-    - shadows
 
 
-  Floating things
-    - rosettes
-    - lines
 
 
-  - moirre
-    - true
-    - false
-
-*/
-
-
+const overrides = tokenData.attrOverrides || {}
 
 
 const attrs = {
   speed, rotation, rotationDirection, startHue, rosetteType, radiaChange, bgColor, colorStrategy, layerMult,
-  alternateThickness, alternateHues, brainwave, hasAura, hasPump, adRate, emoji, emojiStrategy
+  alternateThickness, alternateHues, brainwave, toneAdj, hasAura, hasPump, adRate, emoji, emojiStrategy,
+  emojiInvert,
+  ...overrides
 }
 
 console.log(attrs)

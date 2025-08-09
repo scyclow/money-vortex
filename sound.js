@@ -40,24 +40,6 @@ const hopefulNotes = {
 
 
 
-const optimisticNotes = {
-  f4: 349.23,
-  as4: 466.16,
-  d5: 587.33,
-  // a4: 440,
-  // cs5: 554.37,
-  f5: 698.46
-
-  // a4: 440,
-  // d5: 587.33,
-  // e5: 329.63*2,
-  // a5: 440*2,
-
-}
-
-
-
-
 
 const notes = sample([
   {
@@ -77,11 +59,10 @@ const notes = sample([
 
 const tone = notes.main
 
-const toneAdj = rnd(0.5, 1.5) / 2
 
 
 function getTone(t) {
-  const toneM = t * toneAdj
+  const toneM = t * attrs.toneAdj
 
   const bwAdj = posOrNeg() * attrs.brainwave/2
   const toneL = toneM - bwAdj
@@ -168,6 +149,7 @@ export function muteSound() {
 }
 
 
+const defaultAffirmationSpeed = attrs.toneAdj < 0.35 ? 0.8 : 0.9
 
 export async function activateSound() {
   if (soundActivated) {
@@ -207,7 +189,7 @@ export async function activateSound() {
     } else {
       lastAffirmation = aff
       const voice = vs[CONTROL_STATE.affirmationVoiceIx || 0]
-      say(voice, aff, { speed: CONTROL_STATE.affirmationSpeed || 0.9 })
+      say(voice, aff, { speed: CONTROL_STATE.affirmationSpeed || defaultAffirmationSpeed })
     }
   }
 
