@@ -34,15 +34,11 @@ const colorStrategy = chance(
 const alternateThickness = rndint(1, 7)
 const alternateHues = sample([
   // [180],
-  [30, 60, 90, 120, 90, 60, 30],
   // [60, 120, 180, 120, 60],
-
   // [120, 240, 120],
-
   // [90, 180, 270],
-
   // [330, 30, 180],
-
+  [30, 60, 90, 120, 90, 60, 30],
   [40, 80, 40],
   [10, 20, 30, 40, 50, 60, 50, 40, 30, 20, 10],
   [30, 60, 90, 60, 30],
@@ -74,8 +70,6 @@ const adRate = chance(
 const emojiStrategy = chance(
   [1, 'dance'],
   [1, 'growShrink'],
-  // [1, 'float'],
-  // [1, 'fadeInOut'],
 )
 
 

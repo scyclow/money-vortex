@@ -3,8 +3,8 @@ import {mantras} from './affirmations.js'
 import {CONTROL_STATE} from './controls.js'
 
 
-const style = document.createElement('style');
-document.body.appendChild(style);
+const style = document.createElement('style')
+document.body.appendChild(style)
 
 
 
@@ -155,12 +155,4 @@ export function mountEmoji() {
     }, 300000) // every 5 min
   }, 15000)
 
-
-
-
-  // if (CONTROL_STATE.emojis) {
-  //   document.getElementById('emojiView').style.opacity = '1'
-  // } else {
-  //   document.getElementById('emojiView').style.opacity = '0'
-  // }
 }

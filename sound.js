@@ -1,12 +1,9 @@
 
 import {MAX_VOLUME, SoundSrc} from './audio.js'
 import {CONTROL_STATE} from './controls.js'
-
 import {voices, say} from './voices.js'
 import affirmations from './affirmations.js'
 import attrs from './attrs.js'
-
-
 
 
 const somberNotes = {
@@ -160,10 +157,6 @@ export async function activateSound() {
   soundActivated = true
   const vs = await voices
 
-  // TODO
-    // main volume shoudl sort of fade in and out
-    // multiple secondaries out of sync, making chords
-
   const main = playTone(notes.main)
 
   main.leftChannel.smoothGain(MAX_VOLUME/2, 0.2)
@@ -171,11 +164,10 @@ export async function activateSound() {
 
   const secondary = playTone(sample(notes.secondary, main), MAX_VOLUME* 1.25)
   const tertiary = playTone(sample(notes.secondary, [main, secondary]), MAX_VOLUME* 1.25)
-  // const quarternary = playTone(sample(notes.secondary, [main, secondary, tertiary]), MAX_VOLUME* 1.25)
+
 
   playSecondaryNote(secondary, 4000, notes.main)
   playSecondaryNote(tertiary, 4500, notes.main, 3000)
-  // playSecondaryNote(quarternary, 4500, notes.main, 3000)
 
 
 

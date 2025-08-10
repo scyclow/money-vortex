@@ -74,6 +74,7 @@ function keyEvent(key) {
     CONTROL_STATE.popups = true
     CONTROL_STATE.affirmationVoiceIx = 0
     CONTROL_STATE.affirmationVoiceSpeed = defaultAffirmationSpeed
+    CONTROL_STATE.speedModifer = 1
 
   } else if (key === 'ArrowRight') {
     voices.then(vs => {

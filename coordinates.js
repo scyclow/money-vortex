@@ -1,6 +1,9 @@
 import attrs from './attrs.js'
 
 
+const returnOne = () => 1
+const evenStart = () => prb(0.5) ? 0 : 0.5
+
 const typeFunctions = {
   normal() {
     const points = 1800
@@ -40,23 +43,6 @@ const typeFunctions = {
     }
   },
 
-  // spikey() {
-  //   const points = 1800-4
-  //   const gearWaveFrequency = 4
-  //   const gearWaveAmplitude = 0.04
-
-  //   return {
-  //     points,
-  //     gearWaveFrequency,
-  //     gearWaveAmplitude,
-  //     layers: 40,
-  //     radiaChange: attrs.radiaChange,
-  //     radiaAdj: (p) => {
-  //       const progress = Math.PI * p / points
-  //       return 1 + Math.abs(Math.sin((p/gearWaveFrequency)) * gearWaveAmplitude) * -1
-  //     }
-  //   }
-  // },
 
   wavey() {
     const points = 900
@@ -81,8 +67,6 @@ const typeFunctions = {
 
   numismatic() {
     const points = 900
-    // const gearWaveFrequency = 20
-    // const gearWaveAmplitude = 0.06
     const gearWaveFrequency = 30
     const gearWaveAmplitude = 0.07
     const cycles = 3
@@ -96,8 +80,6 @@ const typeFunctions = {
       cycles,
       startOffset: gearWaveFrequency/cycles,
       radiaAdj: p => {
-        // const progress = 2 * Math.PI * p / points
-
         const progress = 2 * Math.PI * p / points
         const frequency = progress * gearWaveFrequency
 
@@ -189,6 +171,78 @@ const pathToCoords = path => {
 
   return centered
 }
+
+
+
+function generateGears(gearsN=8, rotationMax=15, radia=0.1, startFn=returnOne) {
+  const gears = [
+    {
+      rotation: 1,
+      radia: 1,
+      radiaStart: 1,
+      radiaAdj: returnOne//(p, i, _x, _y, baseRadius, prevRadius) => i ? 1 : (p%2 ? 1 : prevRadius/baseRadius),
+    },
+    ...times(gearsN - 1, g => ({
+      rotation: int(rnd(-rotationMax, rotationMax)),
+      radia: rnd(0, radia),
+      radiaStart: startFn(),
+      radiaAdj: returnOne//(p, i, _x, _y, baseRadius, prevRadius) => i ? 1 : (p%2 ? 1 : prevRadius/baseRadius),
+    }))
+  ]
+
+  const totalRadia = gears.reduce((sum, g) => g.radia + sum, 0)
+  return gears.map(g => ({
+    ...g,
+    radia: g.radia/totalRadia
+  }))
+}
+
+
+function createSpirographFn(baseRadius, gears) {
+  let c = 0
+  return (progress, p, increase=0) => gears.reduce(([_x, _y], gear, i) => {
+    let a = 0
+    if (i===0) {
+      c += increase
+      a = c
+    } else {
+      a = c* 0.5
+    }
+
+    const angle = (progress + gear.radiaStart % 1) * gear.rotation
+    const radius = (1+a)* baseRadius * gear.radia * gear.radiaAdj(p, i, _x, _y, baseRadius)
+    return getXYRotation(
+      angle * TWO_PI,
+      radius,
+      _x,
+      _y
+    )
+  }
+    ,
+    [0, 0]
+  )
+}
+
+function getRosettePoints(rad, gears, cycles=1, spacing=0, startOffset=0, pointCount=900, pointCountAddition=2) {
+  const spirographFn = createSpirographFn(rad, gears)
+
+  return times(
+    (cycles*pointCount+pointCountAddition*cycles),
+    p => {
+      const _p = p + (pointCount*startOffset)
+      return spirographFn(
+        _p/(pointCount+pointCountAddition),
+        _p,
+        spacing*_p/pointCount
+      )
+    }
+  )
+}
+
+
+
+
+
 
 export const coordsList = paths.map(pathToCoords)
 

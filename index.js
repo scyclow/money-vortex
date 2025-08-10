@@ -1,64 +1,85 @@
 import attrs from './attrs.js'
 
-  import {coordsList, props} from './coordinates.js'
-  import {createProgram} from './shaderBoilerplate.js'
-  import {activateSound, muteSound} from './sound.js'
-  import {CONTROL_STATE} from './controls.js'
-  import {mountEmoji} from './emojis.js'
-  import {displayPopup} from './sponsoredContent.js'
+import {coordsList, props} from './coordinates.js'
+import {createProgram} from './shaderBoilerplate.js'
+import {activateSound, muteSound} from './sound.js'
+import {CONTROL_STATE} from './controls.js'
+import {mountEmoji} from './emojis.js'
+import {displayPopup} from './sponsoredContent.js'
 import {mantras} from './affirmations.js'
 
+const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency } = props
 
 
 
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext("webgl")
-  const dpr = window.devicePixelRatio || 1
 
-  canvas.style.display = 'block';
-  canvas.style.zIndex = '1';
-
-
-
-  const { points, layers, radiaAdj, radiaChange, gearWaveAmplitude, gearWaveFrequency } = props
+const vsSource = `
+  attribute vec2 a_position;
+  uniform float u_time;
+  uniform float u_animScale;
+  uniform float u_aspect;
+  uniform vec2 u_offset;
+  uniform float u_rotation;
 
 
+  void main() {
+    float scale = mix(0.05, 1.0, u_animScale);
 
-  const vsSource = `
-    attribute vec2 a_position;
-    uniform float u_time;
-    uniform float u_animScale;
-    uniform float u_aspect;
-    uniform vec2 u_offset;
-    uniform float u_rotation;
+    float angle = u_rotation;
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    vec2 rotatedPosition = vec2(
+      a_position.x * cosA - a_position.y * sinA,
+      a_position.x * sinA + a_position.y * cosA
+    );
+
+    vec2 pos = (rotatedPosition * scale) + u_offset * (u_animScale / 16.0);
+    pos.x /= u_aspect;
+
+    gl_Position = vec4(pos, 0.0, 1.0);
+  }
+`
+
+const fsSource = `
+  precision mediump float;
+  uniform vec4 u_color;
+
+  void main() {
+    gl_FragColor = u_color;
+  }
+`
 
 
-    void main() {
-      float scale = mix(0.05, 1.0, u_animScale);
 
-      float angle = u_rotation;
-      float cosA = cos(angle);
-      float sinA = sin(angle);
-      vec2 rotatedPosition = vec2(
-        a_position.x * cosA - a_position.y * sinA,
-        a_position.x * sinA + a_position.y * cosA
-      );
 
-      vec2 pos = (rotatedPosition * scale) + u_offset * (u_animScale / 16.0);
-      pos.x /= u_aspect;
 
-      gl_Position = vec4(pos, 0.0, 1.0);
-    }
-  `;
 
-  const fsSource = `
-    precision mediump float;
-    uniform vec4 u_color;
+const canvas = document.createElement('canvas')
+const gl = canvas.getContext("webgl")
+// const dpr = window.devicePixelRatio || 1
 
-    void main() {
-      gl_FragColor = u_color;
-    }
-  `;
+canvas.style.display = 'block'
+canvas.style.zIndex = '1'
+
+
+let ASPECT_RATIO = canvas.width / canvas.height
+
+
+function resize() {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  ASPECT_RATIO = canvas.width / canvas.height
+  gl.viewport(0, 0, canvas.width, canvas.height)
+}
+
+resize()
+window.onresize = resize
+
+
+const style = document.createElement('style')
+document.body.appendChild(style)
+
+style.textContent = `* { padding: 0; margin: 0; }`
 
 
 
@@ -114,27 +135,6 @@ function createPrograms(coordsList) {
 
 const programs = createPrograms(coordsList)
 
-
-
-
-
-
-let ASPECT_RATIO = canvas.width / canvas.height
-
-
-function resize() {
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-  ASPECT_RATIO = canvas.width / canvas.height
-  gl.viewport(0, 0, canvas.width, canvas.height)
-}
-
-resize()
-window.onresize = resize
-
-
-
-const rndVibrate = rnd() / 10
 
 
 
@@ -195,7 +195,7 @@ function render(timeMs) {
     }
 
 
-    const animProgress = 3*animScale/128; // btwn 0-3
+    const animProgress = 3*animScale/128 // btwn 0-3
 
 
 

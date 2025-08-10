@@ -45,21 +45,6 @@ export function createSource(waveType = 'sine', startingFreq=3000) {
     )
   }
 
-  // const mute = () => {
-  //   gain.gain.setTargetAtTime(
-  //     Math.min(0, MAX_VOLUME),
-  //     ctx.currentTime,
-  //     0.001
-  //   )
-  // }
-  // const unmute = () => {
-  //   gain.gain.setTargetAtTime(
-  //     Math.min(volume, MAX_VOLUME),
-  //     ctx.currentTime,
-  //     0.001
-  //   )
-  // }
-
   const src = {
     source, gain, panner,smoothFreq, smoothGain, smoothPanner, originalSrcType: source.type, //mute, unmute,
     stop() {
@@ -72,9 +57,6 @@ export function createSource(waveType = 'sine', startingFreq=3000) {
 }
 
 
-
-
-// EXPERIMENTAL
 
 
 export class SoundSrc {
