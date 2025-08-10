@@ -15,6 +15,11 @@ export const voices = new Promise((res, rej) => {
           if (!voices.length) getVoices()
           else {
             const englishVoices = voices.filter(v => v.lang === 'en-US' || v.lang === 'en_US')
+            const defaultVoice = englishVoices.find(v => v.default)
+
+            if (defaultVoice && defaultVoice !== englishVoices[0]) {
+              englishVoices.unshift(defaultVoice)
+            }
 
             res(englishVoices.length ? englishVoices : voices)
           }

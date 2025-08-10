@@ -54,7 +54,6 @@ import {mantras} from './affirmations.js'
   const fsSource = `
     precision mediump float;
     uniform vec4 u_color;
-    uniform vec2 u_offset;
 
     void main() {
       gl_FragColor = u_color;
@@ -135,19 +134,6 @@ window.onresize = resize
 
 
 
-
-
-
-
-
-
-
-// let {r, g, b} = chance(
-//   [1, {r: 1, g: 0.25, b: 0}],
-//   [1, {r: 0, g: 1, b: 1}],
-//   [1, {r: 1, g: 0.25, b: 1}],
-// )
-
 const rndVibrate = rnd() / 10
 
 
@@ -191,9 +177,6 @@ function render(timeMs) {
 
 
 
-    // const animScale = (1 + (frame % 2 ? rndVibrate : 0)) * (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
-    // const animScale = (1 + (Math.random() / 100)) * (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
-    // const animScale = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
     const animScale = (0.2 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 7.0
     const animScale2 = (0.3 * ((timeSec * 0.25 + (i + 1) * 5 / layers) % 10.0 )) ** 4.0
 
@@ -219,12 +202,8 @@ function render(timeMs) {
 
     let {r, g, b} = colorStrategy(animProgress, i, frame)
 
-    // ({r, g, b} = hsvToRgb(attrs.startHue + (animProgress * 130), 0.4  + 0.35 * animProgress, 1))
-
-    // if (frame % 120 === 0 && i % 4 === 0) console.log(r, g, b)
 
     if (attrs.aura) drawVertex(25, animScale, 1, 1, 1, 0.5)
-    // drawVertex(24.975 , animScale, 1, 1, 1, 0.5)
 
     const shadows = 12
     const lineSpace = 0.0025
@@ -233,7 +212,7 @@ function render(timeMs) {
 
 
 
-    // const pumpFactor = getPumpFactor(i, frame)
+
     const phase = (frame - i * 10) / (programs.length * 5) // repeat every 5s
 
     const pumpFactor = Math.sin(
@@ -327,50 +306,6 @@ canvas.onclick = () => {
 
 
 
-
-
-
-//   .dollar {
-//     position: absolute;
-//     animation: blink 6s infinite;
-//     pointer-events: none;
-//     user-select: none;
-//     z-index: 0;
-//     font-family: sans-serif;
-//     color: #fff;
-//   }
-
-//   @keyframes blink {
-//     0%, 100% { opacity: 0.5; }
-//     50% { opacity: 0; }
-//   }
-
-//   body {
-//     margin: 0;
-//     overflow: hidden;
-//     background-color: black;
-//   }
-// `;
-
-// const numDollars = 200;
-
-// for (let i = 0; i < numDollars; i++) {
-//   const dollar = document.createElement('div');
-//   dollar.className = 'dollar';
-//   dollar.innerText = '$';
-
-//   const size = rnd() * 2 + 8; // font size between 12px and 36px
-//   const x = rnd() * 100;
-//   const y = rnd() * 100;
-
-//   dollar.style.animationDelay = rnd(-6) + 's';
-//   dollar.style.left = `${x}vw`;
-//   dollar.style.top = `${y}vh`;
-//   dollar.style.fontSize = `${size}px`;
-//   dollar.style.opacity =rnd().toFixed(2); // random initial opacity
-
-//   document.body.appendChild(dollar);
-// }
 
 
 
