@@ -1,0 +1,3 @@
+for f in *.png; do
+    mv "$f" "$(echo "$f" | sed -E 's/-[^.]+(\.png)$/\1/')"
+done
