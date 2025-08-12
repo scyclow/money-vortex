@@ -166,7 +166,7 @@ function generateAttrs(tokenData) {
 
 // Example array of hashes
 const hashes = [
-  '0x900b3659952b8ed1dba65eb4859322aca9f9c03687947f89aff9886cb0261309',
+  '0x3c4d427254610dc2e8c1bdff4ecc792ed72c88ec59e4cba1e11abccca679f158',
   '0x8e2ec2e4f73e742511e065f0ac787a6e3db1a0a8198dd0150d8f76f179228b3f',
   '0x254a2872769b1e8053a116b0dc1b55ccedd0ae3f9f8f1c9f5c339060f417f06d',
   '0x39d4cceac5767ed511099a424698ddb6f73d4deda31d5207531eeda83488d0bd',
@@ -211,11 +211,11 @@ const hashes = [
   '0xaa64342e4c14c57540d2dc615c012ff84bec9f15c15cd5a1820e42256b7b5adc',
   '0xce0c3981cde8963af157bab1b9e53d312df1b8cf9450b4f8d28074fecf880491',
   '0x633da95c1e326285f088a082f9b58f34ea61c4d4881144073bdaf12270c409c6',
-  '0x8e26ac98641f346af4dedc9f4135da61ce78302fadb1a6c0eda198800ecdddb2',
-  '0x3c4d427254610dc2e8c1bdff4ecc792ed72c88ec59e4cba1e11abccca679f158',
+  '0x900b3659952b8ed1dba65eb4859322aca9f9c03687947f89aff9886cb0261309',
   '0xe686690398ecad9a07f791e3ec1375b2b59877c4e44aa9901bccc2f68183d0ac',
   '0xc8b2d190ad45a785a60ad933973ee993f2381ec59f55cf47f1a8c146eebecd49',
   '0x600549008cd3a9f33dc22140924ded7d2faf0fda1beffc961caeb886edd20d2b',
+  '0x7d3a0147a50a95dcdd7d02a1ed6b9313722f74cb1cd0e96c0cce6f54b65af1b4',
 ]
 
 const titles = [
@@ -325,8 +325,8 @@ const mantras = [
   'I DESERVE TO BE RICH',
 ]
 
-const HTML_IPFS_HASH = 'QmfLMCFvSpA4AKvgi17XTiAPXQn4M8fV6uEBqrJcyTfUqp'
-const PNG_IPFS_HASH = 'QmcphLV3Ene1mf3xTTqVn5AEyMT8BarcoqGSSvMVP28WwZ'
+const HTML_IPFS_HASH = 'QmQGAsG8zX68NgV1pmx4SmHcxzbPcXF1rHivvQ4KyQj4dv'
+const PNG_IPFS_HASH = 'QmQ8R4yujPFKJKLbXMjZyT5dFKeXiG3gXmZ6maEEHaTp7w'
 
 
 
@@ -361,7 +361,7 @@ function generateJSON(attrs, tokenData) {
   return JSON.stringify({
     name: titles[tokenData.tokenId],
     description: `
-This is not a coincidence! You were meant to find this 🙏 Enter the Money Vortex to Manifest Wealth with Subliminal Reprogramming techniques. Tune In to the Millionaire Frequency and clear ALL of your Financial Blockages. This powerful Energy Session will help you attract Wealth and Abundance. Your Frequency determines your Fortune! You WILL receive a huge amount of Money
+This is not a coincidence! You were meant to find this 🙏 Enter the Money Vortex to Manifest Wealth with Subliminal Reprogramming techniques. Tune In to the Millionaire Frequency and clear ALL of your Financial Blockages. This powerful Energy Session will help you attract Wealth and Abundance. Your Frequency determines your Fortune! You WILL receive a huge amount of Money.
 
 #BinauralBeats #MillionaireMediation #LawOfAttraction #ManifestMoney #GoldenOpportunity #CashFlowMindfulness #777Hz #888Hz #432Hz #AbundanceMindset #PositiveVibrations #SpiritualWealth #FinancialFreedom #MoneyVortex #VibrationalShift #Numisma #MiracleWindfall #LotteryJackpotWInner
 
